@@ -148,13 +148,156 @@ supabase logs
 
 ```
 lib/
-├── server/
-│   ├── services/     # Business logic layer
-│   ├── models/       # Data models
-│   └── data/        # Data access layer
-└── main.dart        # Entry point
+├── main.dart               # Application entry point
+├── providers/             # State management
+│   ├── player.provider.dart   # Player state management
+│   └── ...
+├── server/               # Backend integration
+│   ├── services/         # Business logic layer
+│   │   ├── player.service.dart
+│   │   ├── game.service.dart
+│   │   └── ...
+│   ├── models/          # Data models
+│   │   ├── player.dart
+│   │   ├── game.dart
+│   │   └── ...
+│   └── data/           # Data access layer
+│       ├── player.repository.dart
+│       ├── game.repository.dart
+│       └── ...
+├── screens/            # UI screens
 ```
 
+### State Management with Providers
+
+The application uses the Provider pattern for state management. Each major feature has its own provider that manages its state and business logic. For example, the `PlayerProvider`:
+
+```dart
+class PlayerProvider extends ChangeNotifier {
+  final _playerService = GetIt.instance<PlayerService>();
+  
+  Player? _currentPlayer;
+  List<Picture> _pictures = [];
+  
+  // Expose state
+  Player? get currentPlayer => _currentPlayer;
+  List<Picture> get pictures => _pictures;
+  
+  // Methods to modify state
+  Future<void> updateProfile({required String name, String? biography}) async {
+    // Update player profile
+    // Notify listeners of changes
+  }
+}
+```
+
+## Architecture Overview
+
+### Server Layer Organization
+
+The server-side code follows a clean architecture pattern with three main layers:
+
+#### 1. Models Layer (`/server/models/`)
+- Pure Dart classes representing database entities
+- Handles JSON serialization/deserialization
+- No business logic or data access
+- Example: `Player`, `Game`, `Picture` models
+
+```dart
+// Example model structure (player.dart)
+class Player {
+  final String id;
+  final String username;
+  
+  Player.fromJson(Map<String, dynamic> json) {
+    // Conversion from JSON to Dart object
+  }
+  
+  Map<String, dynamic> toJson() {
+    // Conversion from Dart object to JSON
+  }
+}
+```
+
+#### 2. Data Layer (`/server/data/`)
+- Repository classes for direct Supabase interaction
+- Handles raw database queries and mutations
+- No business logic
+- One repository per entity type
+- Example: `PlayerRepository`, `GameRepository`, `PictureRepository`
+
+```dart
+// Example repository structure (player.repository.dart)
+class PlayerRepository {
+  final SupabaseClient _supabase;
+  
+  Future<Player> getPlayer(String id) async {
+    // Raw database query
+    final response = await _supabase
+        .from('players')
+        .select()
+        .eq('player_id', id)
+        .single();
+    
+    return Player.fromJson(response);
+  }
+}
+```
+
+#### 3. Services Layer (`/server/services/`)
+- Business logic implementation
+- Orchestrates data operations
+- Error handling and validation
+- One service per major feature
+- Example: `PlayerService`, `GameService`, `PictureService`
+
+```dart
+// Example service structure (player.service.dart)
+class PlayerService {
+  final PlayerRepository _repository;
+  
+  Future<Player> getPlayerProfile(String id) async {
+    try {
+      // Business logic, validation, error handling
+      return await _repository.getPlayer(id);
+    } catch (e) {
+      throw PlayerServiceException('Failed to get player profile: $e');
+    }
+  }
+}
+```
+
+### Dependency Injection
+
+The application uses the `get_it` package for service location and dependency injection:
+
+1. Service Registration (`service_locator.dart`):
+   - Registers all repositories and services as singletons
+   - Manages dependencies between services
+   - Initializes Supabase client
+
+```dart
+// Example service registration
+final getIt = GetIt.instance;
+
+setupServices() {
+  // Register repositories
+  getIt.registerLazySingleton(() => PlayerRepository(supabase));
+  
+  // Register services with their dependencies
+  getIt.registerLazySingleton(() => PlayerService(getIt<PlayerRepository>()));
+}
+```
+
+2. Service Usage in App:
+   - Services are accessed through `getIt`
+   - No need to manually manage dependencies
+   - Consistent singleton instances throughout the app
+
+```dart
+// Example service usage in widgets
+final playerService = getIt<PlayerService>();
+```
 
 ## Troubleshooting
 

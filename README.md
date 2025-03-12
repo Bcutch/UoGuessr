@@ -299,6 +299,116 @@ setupServices() {
 final playerService = getIt<PlayerService>();
 ```
 
+## Supabase Deployment
+
+### Connecting to Supabase Project
+
+1. Install Supabase CLI (if not already installed):
+```bash
+brew install supabase/tap/supabase   # macOS
+```
+
+2. Login to Supabase:
+```bash
+supabase login
+```
+
+3. List your Supabase projects:
+```bash
+supabase projects list
+```
+This will show all your projects and their reference IDs in the format:
+```
+                          Name                           | Reference ID | Database Status |   URL
++-------------------------------------------------------+--------------+-----------------+-----------+
+  your-project-name                                      | abcdefghijkl | Active         | app.supabase.com
+```
+
+4. Link your local project to Supabase (using the Reference ID from step 3):
+```bash
+supabase link --project-ref your-project-ref
+```
+> Note: The project reference is the unique identifier shown in the 'Reference ID' column from the projects list
+
+5. Push database changes:
+```bash
+supabase db push
+```
+
+### Edge Functions
+
+Edge functions are serverless functions that run on Supabase's edge network. They're located in the `supabase/functions` directory.
+
+#### Creating a New Edge Function
+
+1. Create a new function:
+```bash
+supabase functions new your-function-name
+```
+
+This creates a new TypeScript function in `supabase/functions/your-function-name/index.ts`
+
+2. Example edge function structure:
+```typescript
+// supabase/functions/calculate-score/index.ts
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+
+interface ScoreParams {
+  guessLocation: [number, number]
+  actualLocation: [number, number]
+}
+
+serve(async (req) => {
+  try {
+    const { guessLocation, actualLocation } = await req.json() as ScoreParams
+    
+    // Your function logic here
+    const score = calculateScore(guessLocation, actualLocation)
+    
+    return new Response(
+      JSON.stringify({ score }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+})
+```
+
+#### Testing Edge Functions Locally
+
+1. Start the edge functions development server:
+```bash
+supabase functions serve
+```
+
+2. Test with curl:
+```bash
+curl -L -X POST 'http://localhost:54321/functions/v1/your-function-name' \
+-H 'Authorization: Bearer your-anon-key' \
+-d '{"key": "value"}'
+```
+
+#### Deploying Edge Functions
+
+1. Deploy a single function:
+```bash
+supabase functions deploy your-function-name
+```
+
+2. Deploy all functions:
+```bash
+supabase functions deploy
+```
+
+### Environment Management
+```bash
+supabase functions deploy --no-verify-jwt
+```
+
 ## Troubleshooting
 
 ### Common Issues

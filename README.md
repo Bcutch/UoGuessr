@@ -1,93 +1,435 @@
 # UoGuesser
 
+A location-based guessing game where users try to identify where pictures were taken on a map. Players can upload their own pictures, which become part of the game's content. The game includes multiple modes and features both online and offline functionality.
 
+## Features
 
-## Getting started
+- Daily challenges with 5 random pictures
+- Unlimited mode for continuous play
+- Picture upload with location data
+- Google Maps integration
+- Global and friends leaderboards
+- User profiles with biography and picture gallery
+- Offline play capability
+- Score synchronization
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Prerequisites
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Before you begin, ensure you have the following installed:
+- [Flutter](https://flutter.dev/docs/get-started/install) (latest stable version)
+- [Dart](https://dart.dev/get-dart) (latest stable version)
+- [Git](https://git-scm.com/downloads)
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local Supabase)
+- [Node.js](https://nodejs.org/) (LTS version)
 
-## Add your files
+## Getting Started
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+### 1. Clone the Repository
+
+```bash
+git clone https://gitlab.socs.uoguelph.ca/w25-4030-section-01/group_17/uoguesser.git
+cd uoguesser
+```
+
+### 2. Set Up Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+touch .env
+```
+
+Add the following variables to your `.env` file (get these values from the team lead):
+```env
+SUPABASE_URL=your_production_supabase_url
+SUPABASE_ANON_KEY=your_production_supabase_anon_key
+```
+
+> **Important**: We are currently working directly with the production database. The local Supabase setup described below is optional and only needed if you want to experiment with database changes without affecting the production environment.
+
+### 3. Install Flutter Dependencies
+
+```bash
+flutter pub get
+```
+
+### 4. Local Supabase Development (Optional)
+
+> **Note**: This section is for developers who need to test database changes locally. For regular development, you can skip this section as we are working with the production database.
+
+If you need to test database changes without affecting the production environment, you can set up a local Supabase instance:
+
+1. Start Docker Desktop
+
+2. Initialize Supabase project:
+```bash
+supabase init
+```
+
+3. Start local Supabase:
+```bash
+supabase start
+```
+
+This will create a local Supabase instance with the following credentials:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.socs.uoguelph.ca/w25-4030-section-01/group_17/uoguesser.git
-git branch -M main
-git push -uf origin main
+API URL: http://127.0.0.1:54321
+     GraphQL URL: http://127.0.0.1:54321/graphql/v1
+  S3 Storage URL: http://127.0.0.1:54321/storage/v1/s3
+          DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      Studio URL: http://127.0.0.1:54323
+    Inbucket URL: http://127.0.0.1:54324
+      JWT secret: <secret>
+        anon key: <key>
+service_role key: <key>
+   S3 Access Key: <key>
+   S3 Secret Key: <key>
+       S3 Region: local
 ```
 
-## Integrate with your tools
+4. To use the local instance instead of production, update your `.env` file with the local credentials provided by `supabase start`.
 
-- [ ] [Set up project integrations](https://gitlab.socs.uoguelph.ca/w25-4030-section-01/group_17/uoguesser/-/settings/integrations)
+### 5. Run the Application
 
-## Collaborate with your team
+```bash
+flutter run
+```
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Development Workflow
 
-## Test and Deploy
+### Database Changes
 
-Use the built-in continuous integration in GitLab.
+> **Important**: We are currently working with the production database. Please coordinate with everyone before making any database changes.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Database Migrations
 
-***
+All database migrations are stored in `supabase/migrations/`. To manage migrations:
 
-# Editing this README
+1. Create a new migration:
+```bash
+supabase migration new your_migration_name
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+2. Apply migrations:
+```bash
+supabase migration up
+```
 
-## Suggestions for a good README
+3. Revert last migration:
+```bash
+supabase migration down
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+4. Reset database:
+```bash
+supabase db reset
+```
 
-## Name
-Choose a self-explaining name for your project.
+### Working with Supabase
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. Start local Supabase:
+```bash
+supabase start
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+2. Stop local Supabase:
+```bash
+supabase stop
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+3. View logs:
+```bash
+supabase logs
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Code Structure
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```
+lib/
+├── main.dart               # Application entry point
+├── providers/             # State management
+│   ├── player.provider.dart   # Player state management
+│   └── ...
+├── server/               # Backend integration
+│   ├── services/         # Business logic layer
+│   │   ├── player.service.dart
+│   │   ├── game.service.dart
+│   │   └── ...
+│   ├── models/          # Data models
+│   │   ├── player.dart
+│   │   ├── game.dart
+│   │   └── ...
+│   └── data/           # Data access layer
+│       ├── player.repository.dart
+│       ├── game.repository.dart
+│       └── ...
+├── screens/            # UI screens
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### State Management with Providers
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+The application uses the Provider pattern for state management. Each major feature has its own provider that manages its state and business logic. For example, the `PlayerProvider`:
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```dart
+class PlayerProvider extends ChangeNotifier {
+  final _playerService = GetIt.instance<PlayerService>();
+  
+  Player? _currentPlayer;
+  List<Picture> _pictures = [];
+  
+  // Expose state
+  Player? get currentPlayer => _currentPlayer;
+  List<Picture> get pictures => _pictures;
+  
+  // Methods to modify state
+  Future<void> updateProfile({required String name, String? biography}) async {
+    // Update player profile
+    // Notify listeners of changes
+  }
+}
+```
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## Architecture Overview
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Server Layer Organization
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+The server-side code follows a clean architecture pattern with three main layers:
 
-## License
-For open source projects, say how it is licensed.
+#### 1. Models Layer (`/server/models/`)
+- Pure Dart classes representing database entities
+- Handles JSON serialization/deserialization
+- No business logic or data access
+- Example: `Player`, `Game`, `Picture` models
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```dart
+// Example model structure (player.dart)
+class Player {
+  final String id;
+  final String username;
+  
+  Player.fromJson(Map<String, dynamic> json) {
+    // Conversion from JSON to Dart object
+  }
+  
+  Map<String, dynamic> toJson() {
+    // Conversion from Dart object to JSON
+  }
+}
+```
+
+#### 2. Data Layer (`/server/data/`)
+- Repository classes for direct Supabase interaction
+- Handles raw database queries and mutations
+- No business logic
+- One repository per entity type
+- Example: `PlayerRepository`, `GameRepository`, `PictureRepository`
+
+```dart
+// Example repository structure (player.repository.dart)
+class PlayerRepository {
+  final SupabaseClient _supabase;
+  
+  Future<Player> getPlayer(String id) async {
+    // Raw database query
+    final response = await _supabase
+        .from('players')
+        .select()
+        .eq('player_id', id)
+        .single();
+    
+    return Player.fromJson(response);
+  }
+}
+```
+
+#### 3. Services Layer (`/server/services/`)
+- Business logic implementation
+- Orchestrates data operations
+- Error handling and validation
+- One service per major feature
+- Example: `PlayerService`, `GameService`, `PictureService`
+
+```dart
+// Example service structure (player.service.dart)
+class PlayerService {
+  final PlayerRepository _repository;
+  
+  Future<Player> getPlayerProfile(String id) async {
+    try {
+      // Business logic, validation, error handling
+      return await _repository.getPlayer(id);
+    } catch (e) {
+      throw PlayerServiceException('Failed to get player profile: $e');
+    }
+  }
+}
+```
+
+### Dependency Injection
+
+The application uses the `get_it` package for service location and dependency injection:
+
+1. Service Registration (`service_locator.dart`):
+   - Registers all repositories and services as singletons
+   - Manages dependencies between services
+   - Initializes Supabase client
+
+```dart
+// Example service registration
+final getIt = GetIt.instance;
+
+setupServices() {
+  // Register repositories
+  getIt.registerLazySingleton(() => PlayerRepository(supabase));
+  
+  // Register services with their dependencies
+  getIt.registerLazySingleton(() => PlayerService(getIt<PlayerRepository>()));
+}
+```
+
+2. Service Usage in App:
+   - Services are accessed through `getIt`
+   - No need to manually manage dependencies
+   - Consistent singleton instances throughout the app
+
+```dart
+// Example service usage in widgets
+final playerService = getIt<PlayerService>();
+```
+
+## Supabase Deployment
+
+### Connecting to Supabase Project
+
+1. Install Supabase CLI (if not already installed):
+```bash
+brew install supabase/tap/supabase   # macOS
+```
+
+2. Login to Supabase:
+```bash
+supabase login
+```
+
+3. List your Supabase projects:
+```bash
+supabase projects list
+```
+This will show all your projects and their reference IDs in the format:
+```
+                          Name                           | Reference ID | Database Status |   URL
++-------------------------------------------------------+--------------+-----------------+-----------+
+  your-project-name                                      | abcdefghijkl | Active         | app.supabase.com
+```
+
+4. Link your local project to Supabase (using the Reference ID from step 3):
+```bash
+supabase link --project-ref your-project-ref
+```
+> Note: The project reference is the unique identifier shown in the 'Reference ID' column from the projects list
+
+5. Push database changes:
+```bash
+supabase db push
+```
+
+### Edge Functions
+
+Edge functions are serverless functions that run on Supabase's edge network. They're located in the `supabase/functions` directory.
+
+#### Creating a New Edge Function
+
+1. Create a new function:
+```bash
+supabase functions new your-function-name
+```
+
+This creates a new TypeScript function in `supabase/functions/your-function-name/index.ts`
+
+2. Example edge function structure:
+```typescript
+// supabase/functions/calculate-score/index.ts
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+
+interface ScoreParams {
+  guessLocation: [number, number]
+  actualLocation: [number, number]
+}
+
+serve(async (req) => {
+  try {
+    const { guessLocation, actualLocation } = await req.json() as ScoreParams
+    
+    // Your function logic here
+    const score = calculateScore(guessLocation, actualLocation)
+    
+    return new Response(
+      JSON.stringify({ score }),
+      { headers: { 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    )
+  }
+})
+```
+
+#### Testing Edge Functions Locally
+
+1. Start the edge functions development server:
+```bash
+supabase functions serve
+```
+
+2. Test with curl:
+```bash
+curl -L -X POST 'http://localhost:54321/functions/v1/your-function-name' \
+-H 'Authorization: Bearer your-anon-key' \
+-d '{"key": "value"}'
+```
+
+#### Deploying Edge Functions
+
+1. Deploy a single function:
+```bash
+supabase functions deploy your-function-name
+```
+
+2. Deploy all functions:
+```bash
+supabase functions deploy
+```
+
+### Environment Management
+```bash
+supabase functions deploy --no-verify-jwt
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Supabase Connection Issues**
+   - Ensure Docker is running
+   - Check if Supabase is started (`supabase status`)
+   - Verify environment variables are correct
+
+2. **Flutter Build Issues**
+   - Run `flutter clean`
+   - Delete `pubspec.lock` and run `flutter pub get`
+   - Ensure all dependencies are compatible
+
+3. **Database Migration Issues**
+   - Reset the database (`supabase db reset`)
+   - Check migration file syntax
+   - Verify migration order
+
+## Acknowledgments
+
+- University of Guelph
+- CIS*4030 Course Team
+- All contributors to this project

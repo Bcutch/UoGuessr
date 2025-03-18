@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'server/services/service.locator.dart';
 import 'screens/test_upload_screen.dart';
 import 'providers/player.provider.dart';
+import 'screens/game_guessing_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const TestUploadScreen(), // TODO: Replace with actual home screen
+      home: const GameGuessingScreen(), // TODO: Replace with actual home screen
     );
   }
 }

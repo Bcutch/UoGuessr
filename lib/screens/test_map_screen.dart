@@ -117,6 +117,15 @@ class _TestMapScreenState extends State<TestMapScreen> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pop(context); // Goes back to the previous screen
+        },
+        shape: const CircleBorder(),
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.keyboard_arrow_down, size: 32), // Inverted button (v shape)
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

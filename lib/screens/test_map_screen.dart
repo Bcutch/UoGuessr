@@ -7,7 +7,7 @@ class TestMapScreen extends StatefulWidget {
   final double targetLng;
   final Function(double) onScoreUpdate;
   final VoidCallback onNextPicture;
-  final bool isLastImage;
+  final bool isLastImage; // New parameter to track if it's the last image
 
   const TestMapScreen({
     super.key,
@@ -76,27 +76,30 @@ class _TestMapScreenState extends State<TestMapScreen> {
     return 12742 * asin(sqrt(a));
   }
 
-void getDistanceScore() {
-  final distanceKm = calculateDistance(
-    _userGuess.latitude,
-    _userGuess.longitude,
-    _target.latitude,
-    _target.longitude,
-  );
+  void getDistanceScore() {
+    _showLineFromGuess();
+    final distanceKm = calculateDistance(
+      _userGuess.latitude,
+      _userGuess.longitude,
+      _target.latitude,
+      _target.longitude,
+    );
 
-  final distanceMeters = distanceKm * 1000;
+    final distanceMeters = distanceKm * 1000; // Convert to meters
 
-  setState(() {
-    if (distanceMeters <= 10) {
-      _score = 5000;
-    } else if (distanceMeters >= 250) {
-      _score = 0;
-    } else {
-      _score = 5000 * (1 - ((distanceMeters - 10) / 240));
-    }
-  });
-}
+    setState(() {
+      if (distanceMeters <= 10) {
+        _score = 5000;
+      } else if (distanceMeters >= 250) {
+        _score = 0;
+      } else {
+        _score = 5000 * (1 - ((distanceMeters - 10) / 240));
+      }
+      _isScoreCalculated = true;
+    });
 
+    widget.onScoreUpdate(_score!);
+  }
 
   @override
   Widget build(BuildContext context) {

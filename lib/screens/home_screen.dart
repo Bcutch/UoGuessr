@@ -36,6 +36,14 @@ class _HomeScreenScreenState extends State<HomeScreen> {
                 onPressed: () {}, 
                 child: Text('TODO: Leaderboard'),
               ),
+              ElevatedButton(
+                onPressed: () {}, 
+                child: Text('TODO: Your Profile'),
+              ),
+              ElevatedButton(
+                onPressed: () {}, 
+                child: Text('TODO: Friends'),
+              ),
             ],
           ),
         ),

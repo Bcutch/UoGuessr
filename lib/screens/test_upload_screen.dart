@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'dart:math';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,147 +9,208 @@ import '../providers/player.provider.dart';
 import '../server/services/picture.service.dart';
 
 class TestUploadScreen extends StatefulWidget {
-  const TestUploadScreen({super.key});
+  const TestUploadScreen({ Key? key }) : super(key: key);
 
   @override
-  State<TestUploadScreen> createState() => _TestUploadScreenState();
+  _TestUploadScreenState createState() => _TestUploadScreenState();
 }
 
 class _TestUploadScreenState extends State<TestUploadScreen> {
-  final _imagePicker = ImagePicker();
   final pictureService = GetIt.instance<PictureService>();
+  String playerName = "TestName";                         //<-- TO BE REMOVED
+  LatLng ? location;
+  File ? pictureFile;
+  bool isTaken = false;
+  bool isNull = false;
 
-  Future<void> _pickAndUploadImage() async {
+  String error = "";
+
+  Future<PlayerProvider> getPlayer() async {
     final playerProvider = context.read<PlayerProvider>();
-    if (playerProvider.currentPlayer == null) return;
+    if (playerProvider.currentPlayer == null) {
+      throw Exception('You must be logged in to use this feature!');
+    }
+
+    return playerProvider;
+  }
+
+  Future<bool> checkPermissions() async {
+    bool isEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!isEnabled) {
+      throw Exception('Location services are disabled.');
+    }
+
+    LocationPermission permission= await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied){
+
+      permission= await Geolocator.requestPermission();
+    }
+    if(permission == LocationPermission.denied){
+      throw Exception('Location permissions are denied');
+    }
+    if (permission == LocationPermission.deniedForever){
+      throw Exception('Location permissions are denied forever');
+    }
+    return true;
+  }
+
+  Future takePicture() async {
+    try{
+      checkPermissions();
+    } catch (e) {
+      setState(() {
+        error = "Could not get location: $e";
+        isTaken = true;
+        isNull = true;
+      });
+      return;
+    }
+
+    final picture = await ImagePicker().pickImage(source: ImageSource.camera);
+
+    if (picture == null) {
+      setState(() {
+        error = "Picture not found. Please try again.";
+        isTaken = true;
+        isNull = true;
+      });
+      return;
+    }
+
+    pictureFile = File(picture.path);
 
     try {
-      final pickedFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-      );
-      if (pickedFile == null) return;
-
-      // For testing, use random coordinates in Guelph
-      final random = Random();
-      final latitude = 43.5449 + (random.nextDouble() - 0.5) * 0.1;
-      final longitude = -80.2482 + (random.nextDouble() - 0.5) * 0.1;
-
-      final picture = await pictureService.uploadPicture(
-        file: File(pickedFile.path),
-        playerId: playerProvider.currentPlayer!.id,
-        latitude: latitude,
-        longitude: longitude,
-        title: 'Test image ${DateTime.now()}',
+      Position? position = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings( 
+          accuracy: LocationAccuracy.best,
+        ),
       );
 
-      // Add picture to provider's state
-      playerProvider.addPicture(picture);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image uploaded successfully!')),
-      );
+      setState(() {
+        location = LatLng(position.latitude, position.longitude);
+      });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error uploading image: $e')));
+      setState(() {
+        error = "Could not get location: $e";
+        isTaken = true;
+        isNull = true;
+      });
+      return;
     }
+
+    setState(() {
+      error = "";
+      isTaken = true;
+      isNull = false;
+    });
+  }
+
+  Future uploadPicture() async {
+    PlayerProvider ? playerProvider;
+
+    try {
+      playerProvider = await getPlayer();
+    } catch (e) {
+      throw Exception(e);
+    }
+
+    try {
+      // await pictureService.uploadPicture(
+      //   file: pictureFile!,
+      //   playerId: playerProvider.currentPlayer!.id,
+      //   latitude: location!.latitude,
+      //   longitude: location!.longitude,
+      //   title: '$playerName ${DateTime.now()}', //<-- TO BE CHANGED
+      // );
+      setState(() {
+        error = "Photo uploaded!";
+        isTaken = true;
+        isNull = true;
+      });
+    } catch (e) {
+      setState(() {
+        error = "Could not upload photo: $e";
+        isTaken = true;
+        isNull = true;
+      });
+      return;
+    }
+  }
+
+  void cancel() {
+    setState(() {
+      error = "";
+      pictureFile = null;
+      isTaken = false;
+      isNull = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PlayerProvider>(
-      builder: (context, playerProvider, _) {
-        if (playerProvider.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+    if (!isTaken) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(padding: EdgeInsets.all(20)),
+          Text(
+            "Add a picture to the game!",
+            style: TextStyle(fontSize: 30),
+          ),
+          Container(
+            padding: EdgeInsets.all(10),
+          ),
+          FloatingActionButton.extended(
+            onPressed: () => takePicture(),
+            label: Text("Take photo"),
+            icon: Icon(Icons.camera),
+          )
+      ],);
+    } else {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(padding: EdgeInsets.all(20)),
+          Text("Add a picture to the game!"),
+          Container(
+            padding: EdgeInsets.all(10),
+          ),
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Test Upload'),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () => playerProvider.refreshPictures(),
-                tooltip: 'Refresh Pictures',
-              ),
-            ],
+          pictureFile != null ? 
+          SizedBox(
+            height: 400,
+            width: 300,
+            child: Image.file(pictureFile!),
+          ) : 
+          Text(""),
+      
+          !isNull ? 
+          Text("") : 
+          Text(
+            error,
+            style: TextStyle(fontSize: 12),  
           ),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Logged in as: ${playerProvider.currentPlayer?.name ?? "Not logged in"}',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              Expanded(
-                child:
-                    playerProvider.pictures.isEmpty
-                        ? const Center(child: Text('No pictures uploaded yet'))
-                        : GridView.builder(
-                          padding: const EdgeInsets.all(8),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                              ),
-                          itemCount: playerProvider.pictures.length,
-                          itemBuilder: (context, index) {
-                            final picture = playerProvider.pictures[index];
-                            return Card(
-                              clipBehavior: Clip.antiAlias,
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Image.network(
-                                    picture.storageUrl,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (
-                                      context,
-                                      child,
-                                      loadingProgress,
-                                    ) {
-                                      if (loadingProgress == null) return child;
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    },
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      color: Colors.black54,
-                                      child: Text(
-                                        'Lat: ${picture.latitude.toStringAsFixed(4)}\nLng: ${picture.longitude.toStringAsFixed(4)}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-              ),
-            ],
+      
+          Container(
+            padding: EdgeInsets.all(10),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _pickAndUploadImage,
-            tooltip: 'Upload Image',
-            child: const Icon(Icons.add_a_photo),
+      
+          !isNull ? 
+          FloatingActionButton(
+            onPressed: () => uploadPicture(),
+            child: Text("Upload"),
+          ) :
+          FloatingActionButton(
+            onPressed: () => cancel(),
+            child: Text("Go back"),
           ),
-        );
-      },
-    );
+      
+          !isNull ? FloatingActionButton(
+            onPressed: () => cancel(),
+            child: Text("Cancel"),
+          ) : Text("")
+      ],);
+    }
   }
 }

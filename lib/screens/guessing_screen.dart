@@ -20,7 +20,7 @@ class GuessingScreen extends StatelessWidget {
           Navigator.pop(context); // Goes back to the previous screen
         },
         shape: const CircleBorder(),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepOrange,
         child: const Icon(Icons.keyboard_arrow_down, size: 32), // Inverted button (v shape)
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

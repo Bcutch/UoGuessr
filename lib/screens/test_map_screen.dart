@@ -112,7 +112,7 @@ void getDistanceScore() {
     return Scaffold(
       appBar: AppBar(
         title: Text(_score == null ? 'Score: 0' : 'Score: ${_score!.toStringAsFixed(2)}'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Colors.deepOrangeAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -148,7 +148,7 @@ void getDistanceScore() {
           Navigator.pop(context);
         },
         shape: const CircleBorder(),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepOrange,
         child: const Icon(Icons.keyboard_arrow_down, size: 32),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

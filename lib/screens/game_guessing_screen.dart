@@ -40,7 +40,7 @@ class GameGuessingScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showMapScreen(context), // Show sliding map
         shape: const CircleBorder(),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepOrange,
         child: const Icon(Icons.keyboard_arrow_up, size: 32), // ^-shaped button
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

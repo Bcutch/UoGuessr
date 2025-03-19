@@ -19,6 +19,7 @@ class _HomeScreenScreenState extends State<HomeScreen> {
         ),
         body: Center(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
                 onPressed: () => context.go('/game_guessing_screen'),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uoguesser/screens/game_guessing_screen.dart';
 import 'server/services/service.locator.dart';
-import 'screens/test_upload_screen.dart';
 import 'providers/player.provider.dart';
-import 'screens/game_guessing_screen.dart';
+import 'screens/home_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'screens/upload_picture_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,17 +23,38 @@ Future<void> main() async {
   );
 }
 
+/// The route configuration.
+final GoRouter _router = GoRouter(
+  routes: <RouteBase>[
+    GoRoute(
+      path: '/',
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
+      },
+      routes: <RouteBase>[
+        GoRoute(
+          path: 'game_guessing_screen',
+          builder: (BuildContext context, GoRouterState state) {
+            return const GameGuessingScreen();
+          },
+        ),
+        GoRoute(path: 'upload_picture_screen',
+        builder: (BuildContext context, GoRouterState state) {
+            return const TestUploadScreen();
+          },
+        ),
+      ],
+    ),
+  ],
+);
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UoGuesser',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const GameGuessingScreen(), // TODO: Replace with actual home screen
+    return MaterialApp.router(
+      routerConfig: _router,
     );
   }
 }

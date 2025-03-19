@@ -5,6 +5,20 @@ import 'test_map_screen.dart';
 class GameGuessingScreen extends StatelessWidget {
   const GameGuessingScreen({super.key});
 
+  void _showMapScreen(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows for a larger height if needed
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)), // Rounded corners
+      ),
+      builder: (context) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.85, // Adjust height
+        child: const TestMapScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,12 +38,7 @@ class GameGuessingScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TestMapScreen()),
-          );
-        },
+        onPressed: () => _showMapScreen(context), // Show sliding map
         shape: const CircleBorder(),
         backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.keyboard_arrow_up, size: 32), // ^-shaped button

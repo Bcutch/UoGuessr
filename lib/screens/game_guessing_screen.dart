@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'guessing_screen.dart';
 import 'test_map_screen.dart';
 import 'congratulations_screen.dart';
+import 'package:get_it/get_it.dart';
+import '../server/models/game.dart';
+import '../server/models/picture.dart';
+import '../server/services/game.service.dart';
 
 class GameGuessingScreen extends StatefulWidget {
   const GameGuessingScreen({super.key});
@@ -14,6 +18,29 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
   bool _isModalOpen = false;
   double _totalScore = 0;
   int _currentIndex = 0;
+  Game? _game;
+  List<Picture> _pictures = [];
+  final _gameService = GetIt.instance<GameService>();
+
+  String error = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _getDailyGame();
+  }
+
+  Future<void> _getDailyGame() async {
+    try {
+      final _result = await _gameService.getDailyGame();
+      setState(() {
+        _game = _result.game;
+        _pictures = _result.pictures;
+      });
+    } catch (e) {
+      error = "Could not get daily game: $e";
+    }
+  }
 
   final List<String> _imagePaths = [
     'assets/images/University-of-Guelph1.jpg',
@@ -56,11 +83,11 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.85,
             child: TestMapScreen(
-              targetLat: _locations[_currentIndex]['lat'],
-              targetLng: _locations[_currentIndex]['lng'],
+              targetLat: _pictures[_currentIndex].latitude,
+              targetLng: _pictures[_currentIndex].longitude,
               onScoreUpdate: _updateScore,
               onNextPicture: _nextPicture,
-              isLastImage: _currentIndex == _imagePaths.length - 1,
+              isLastImage: _currentIndex == _pictures.length - 1,
             ),
           ),
         );
@@ -79,7 +106,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
   }
 
   void _nextPicture() {
-    if (_currentIndex < _imagePaths.length - 1) {
+    if (_currentIndex < _pictures.length - 1) {
       setState(() {
         _currentIndex++;
       });
@@ -128,7 +155,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
                   minScale: 1.0,
                   maxScale: 5.0,
                   child: Image.asset(
-                    _imagePaths[_currentIndex],
+                    _pictures[_currentIndex].storageUrl,
                     fit: BoxFit.contain,
                   ),
                 ),

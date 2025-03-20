@@ -9,7 +9,7 @@ import '../providers/player.provider.dart';
 import '../server/services/picture.service.dart';
 
 class TestUploadScreen extends StatefulWidget {
-  const TestUploadScreen({ Key? key }) : super(key: key);
+  const TestUploadScreen({Key? key}) : super(key: key);
 
   @override
   _TestUploadScreenState createState() => _TestUploadScreenState();
@@ -17,12 +17,11 @@ class TestUploadScreen extends StatefulWidget {
 
 class _TestUploadScreenState extends State<TestUploadScreen> {
   final pictureService = GetIt.instance<PictureService>();
-  String playerName = "TestName";                         //<-- TO BE REMOVED
-  LatLng ? location;
-  File ? pictureFile;
+  String playerName = "TestName"; 
+  LatLng? location;
+  File? pictureFile;
   bool isTaken = false;
   bool isNull = false;
-
   String error = "";
 
   Future<PlayerProvider> getPlayer() async {
@@ -30,34 +29,29 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
     if (playerProvider.currentPlayer == null) {
       throw Exception('You must be logged in to use this feature!');
     }
-
     return playerProvider;
   }
 
   Future<bool> checkPermissions() async {
     bool isEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isEnabled) throw Exception('Location services are disabled.');
 
-    if (!isEnabled) {
-      throw Exception('Location services are disabled.');
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
     }
-
-    LocationPermission permission= await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied){
-
-      permission= await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      throw Exception('Location permissions are denied.');
     }
-    if(permission == LocationPermission.denied){
-      throw Exception('Location permissions are denied');
-    }
-    if (permission == LocationPermission.deniedForever){
-      throw Exception('Location permissions are denied forever');
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permissions are permanently denied.');
     }
     return true;
   }
 
-  Future takePicture() async {
-    try{
-      checkPermissions();
+  Future<void> takePicture() async {
+    try {
+      await checkPermissions();
     } catch (e) {
       setState(() {
         error = "Could not get location: $e";
@@ -81,14 +75,15 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
     pictureFile = File(picture.path);
 
     try {
-      Position? position = await Geolocator.getCurrentPosition(
-        locationSettings: LocationSettings( 
-          accuracy: LocationAccuracy.best,
-        ),
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
       );
 
       setState(() {
         location = LatLng(position.latitude, position.longitude);
+        error = "";
+        isTaken = true;
+        isNull = false;
       });
     } catch (e) {
       setState(() {
@@ -96,35 +91,33 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
         isTaken = true;
         isNull = true;
       });
-      return;
     }
-
-    setState(() {
-      error = "";
-      isTaken = true;
-      isNull = false;
-    });
   }
 
-  Future uploadPicture() async {
-    PlayerProvider ? playerProvider;
-
+  Future<void> uploadPicture() async {
+    PlayerProvider? playerProvider;
     try {
       playerProvider = await getPlayer();
     } catch (e) {
-      throw Exception(e);
+      setState(() {
+        error = "Error: $e";
+        isNull = true;
+      });
+      return;
     }
 
     try {
+      // Uncomment when integrating backend
       // await pictureService.uploadPicture(
       //   file: pictureFile!,
       //   playerId: playerProvider.currentPlayer!.id,
       //   latitude: location!.latitude,
       //   longitude: location!.longitude,
-      //   title: '$playerName ${DateTime.now()}', //<-- TO BE CHANGED
+      //   title: '${playerProvider.currentPlayer!.name} ${DateTime.now()}',
       // );
+
       setState(() {
-        error = "Photo uploaded!";
+        error = "Photo uploaded successfully!";
         isTaken = true;
         isNull = true;
       });
@@ -134,7 +127,6 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
         isTaken = true;
         isNull = true;
       });
-      return;
     }
   }
 
@@ -144,73 +136,96 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
       pictureFile = null;
       isTaken = false;
       isNull = false;
+      location = null;
     });
+  }
+
+  void goToHomeScreen() {
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isTaken) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(padding: EdgeInsets.all(20)),
-          Text(
-            "Add a picture to the game!",
-            style: TextStyle(fontSize: 30),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-          ),
-          FloatingActionButton.extended(
-            onPressed: () => takePicture(),
-            label: Text("Take photo"),
-            icon: Icon(Icons.camera),
-          )
-      ],);
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(padding: EdgeInsets.all(20)),
-          Text("Add a picture to the game!"),
-          Container(
-            padding: EdgeInsets.all(10),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Upload a Picture"),
+        backgroundColor: Colors.deepOrange,
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Add a picture to the game!",
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
 
-          pictureFile != null ? 
-          SizedBox(
-            height: 400,
-            width: 300,
-            child: Image.file(pictureFile!),
-          ) : 
-          Text(""),
-      
-          !isNull ? 
-          Text("") : 
-          Text(
-            error,
-            style: TextStyle(fontSize: 12),  
+                if (!isTaken) ...[
+                  ElevatedButton.icon(
+                    onPressed: takePicture,
+                    icon: const Icon(Icons.camera),
+                    label: const Text("Take Photo"),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    ),
+                  ),
+                ] else ...[
+                  pictureFile != null
+                      ? SizedBox(
+                          height: 400,
+                          width: 300,
+                          child: Image.file(pictureFile!),
+                        )
+                      : const Text("No picture available"),
+                  
+                  const SizedBox(height: 10),
+
+                  if (isNull)
+                    Text(
+                      error,
+                      style: const TextStyle(fontSize: 14, color: Colors.red),
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  if (!isNull)
+                    ElevatedButton(
+                      onPressed: uploadPicture,
+                      child: const Text("Upload"),
+                    )
+                  else
+                    ElevatedButton(
+                      onPressed: cancel,
+                      child: const Text("Go Back"),
+                    ),
+
+                  const SizedBox(height: 10),
+
+                  ElevatedButton(
+                    onPressed: cancel,
+                    child: const Text("Cancel"),
+                  ),
+                ],
+
+                const SizedBox(height: 30),
+
+                ElevatedButton(
+                  onPressed: goToHomeScreen,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  ),
+                  child: const Text("Back to Home"),
+                ),
+              ],
+            ),
           ),
-      
-          Container(
-            padding: EdgeInsets.all(10),
-          ),
-      
-          !isNull ? 
-          FloatingActionButton(
-            onPressed: () => uploadPicture(),
-            child: Text("Upload"),
-          ) :
-          FloatingActionButton(
-            onPressed: () => cancel(),
-            child: Text("Go back"),
-          ),
-      
-          !isNull ? FloatingActionButton(
-            onPressed: () => cancel(),
-            child: Text("Cancel"),
-          ) : Text("")
-      ],);
-    }
+        ),
+      ),
+    );
   }
 }

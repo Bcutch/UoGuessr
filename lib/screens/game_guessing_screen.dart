@@ -103,7 +103,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Guess the Location"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepOrange,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -140,7 +140,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showMapScreen(context),
         shape: const CircleBorder(),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepOrange,
         child: const Icon(Icons.keyboard_arrow_up, size: 32),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

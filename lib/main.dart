@@ -6,6 +6,7 @@ import 'providers/player.provider.dart';
 import 'screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'screens/upload_picture_screen.dart';
+import 'screens/game_guessing_findit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,11 @@ final GoRouter _router = GoRouter(
         GoRoute(path: 'upload_picture_screen',
         builder: (BuildContext context, GoRouterState state) {
             return const TestUploadScreen();
+          },
+        ),
+        GoRoute(path: 'game_guessing_findit',
+        builder: (BuildContext context, GoRouterState state) {
+            return const GameGuessingFindit();
           },
         ),
       ],

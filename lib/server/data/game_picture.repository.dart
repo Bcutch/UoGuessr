@@ -26,13 +26,17 @@ class GamePictureRepository {
   ///
   /// `gameId`: The id of the game to get pictures for
   Future<List<Picture>> getPicturesForGame(String gameId) async {
-    final response = await _supabase
-        .from(_gamePicturesTable)
-        .select('pictures(*)')
-        .eq('game_id', gameId)
-        .order('sequence_number');
+    final response =
+        await _supabase.rpc('get_pictures_by_game', params: {'gameid': gameId})
+            as List<dynamic>;
 
-    return response.map((row) => Picture.fromJson(row['pictures'])).toList();
+    final pictures =
+        response
+            .where((row) => row != null)
+            .map((row) => Picture.fromJson(row as Map<String, dynamic>))
+            .toList();
+
+    return pictures;
   }
 
   /// Creates game pictures entries for a game

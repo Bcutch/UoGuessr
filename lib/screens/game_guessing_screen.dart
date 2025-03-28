@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'guessing_screen.dart';
 import 'test_map_screen.dart';
 import 'congratulations_screen.dart';
+import 'package:get_it/get_it.dart';
+import '../server/models/game.dart';
+import '../server/models/picture.dart';
+import '../server/services/game.service.dart';
 
 class GameGuessingScreen extends StatefulWidget {
   const GameGuessingScreen({super.key});
@@ -12,8 +16,41 @@ class GameGuessingScreen extends StatefulWidget {
 
 class _GameGuessingScreenState extends State<GameGuessingScreen> {
   bool _isModalOpen = false;
+  bool _isLoading = true;
   double _totalScore = 0;
   int _currentIndex = 0;
+  Game? _game;
+  List<Picture> _pictures = [];
+  final _gameService = GetIt.instance<GameService>();
+
+  String error = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _getDailyGame();
+  }
+
+  Future<void> _getDailyGame() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        error = "";
+      });
+
+      final result = await _gameService.getDailyGame();
+      setState(() {
+        _game = result.game;
+        _pictures = result.pictures;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = "Could not get daily game: $e";
+        _isLoading = false;
+      });
+    }
+  }
 
   final List<String> _imagePaths = [
     'assets/images/University-of-Guelph1.jpg',
@@ -30,7 +67,6 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
     {'lat': 43.5315, 'lng': -80.2242},
     {'lat': 43.5327, 'lng': -80.2291},
   ];
-
 
   void _showMapScreen(BuildContext context) {
     setState(() {
@@ -56,11 +92,11 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.85,
             child: TestMapScreen(
-              targetLat: _locations[_currentIndex]['lat'],
-              targetLng: _locations[_currentIndex]['lng'],
+              targetLat: _pictures[_currentIndex].latitude,
+              targetLng: _pictures[_currentIndex].longitude,
               onScoreUpdate: _updateScore,
               onNextPicture: _nextPicture,
-              isLastImage: _currentIndex == _imagePaths.length - 1,
+              isLastImage: _currentIndex == _pictures.length - 1,
             ),
           ),
         );
@@ -79,7 +115,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
   }
 
   void _nextPicture() {
-    if (_currentIndex < _imagePaths.length - 1) {
+    if (_currentIndex < _pictures.length - 1) {
       setState(() {
         _currentIndex++;
       });
@@ -110,40 +146,79 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
             child: Center(
               child: Text(
                 "Total Score: ${_totalScore.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
         ],
       ),
-      body: IgnorePointer(
-        ignoring: _isModalOpen,
-        child: Column(
-          children: [
-            Expanded(
-              child: Center(
-                child: InteractiveViewer(
-                  panEnabled: true,
-                  boundaryMargin: const EdgeInsets.all(20),
-                  minScale: 1.0,
-                  maxScale: 5.0,
-                  child: Image.asset(
-                    _imagePaths[_currentIndex],
-                    fit: BoxFit.contain,
-                  ),
+      body: _buildBody(),
+      floatingActionButton:
+          _pictures.isNotEmpty
+              ? FloatingActionButton(
+                onPressed: () => _showMapScreen(context),
+                shape: const CircleBorder(),
+                backgroundColor: Colors.deepOrange,
+                child: const Icon(Icons.keyboard_arrow_up, size: 32),
+              )
+              : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildBody() {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (error.isNotEmpty) {
+      return Center(
+        child: Text(error, style: const TextStyle(color: Colors.red)),
+      );
+    }
+
+    if (_pictures.isEmpty) {
+      return const Center(child: Text('No pictures available for this game'));
+    }
+
+    return IgnorePointer(
+      ignoring: _isModalOpen,
+      child: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                boundaryMargin: const EdgeInsets.all(20),
+                minScale: 1.0,
+                maxScale: 5.0,
+                child: Image.network(
+                  _pictures[_currentIndex].storageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value:
+                            loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(child: Text('Error loading image'));
+                  },
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showMapScreen(context),
-        shape: const CircleBorder(),
-        backgroundColor: Colors.deepOrange,
-        child: const Icon(Icons.keyboard_arrow_up, size: 32),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

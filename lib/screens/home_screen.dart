@@ -51,7 +51,7 @@ class _HomeScreenScreenState extends State<HomeScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () => context.go('/game_guessing_findit'),
-                  child: Text('TODO: find it mode'),
+                  child: Text('Find it mode'),
                 ),
                 ElevatedButton(
                   onPressed: () {},

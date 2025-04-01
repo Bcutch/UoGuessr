@@ -16,9 +16,11 @@ class PictureRepository {
   ///
   Future<Picture> getPicture(String id) async {
     final response =
-        await _supabase.from(_table).select().eq('picture_id', id).single();
+        await _supabase.rpc('get_picture', params: {'pictureid': id});
 
-    return Picture.fromJson(response);
+    final picture = Picture.fromJson(response.first as Map<String, dynamic>);
+
+    return picture;
   }
 
   Future<List<Picture>> getPicturesByPlayer(String playerId) async {

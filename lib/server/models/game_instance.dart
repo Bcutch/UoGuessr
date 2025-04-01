@@ -34,9 +34,10 @@ class GameInstance {
       totalScore: json['total_score'],
       averageDistance: json['average_distance'],
       completed: json['completed'] ?? false,
-      guesses:
-          (json['guesses'] as List?)?.map((g) => Guess.fromJson(g)).toList() ??
-          [],
+      guesses: (json['guesses'] as List?)
+        ?.where((g) => g['guess_id'] != null && g['guess_id'].isNotEmpty) 
+        .map((g) => Guess.fromJson(g))
+        .toList() ?? []
     );
   }
 

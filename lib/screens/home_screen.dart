@@ -54,7 +54,7 @@ class _HomeScreenScreenState extends State<HomeScreen> {
                   child: Text('Find it mode'),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.go('/leaderboard_screen'),
                   child: Text('Leaderboard'),
                 ),
                 ElevatedButton(

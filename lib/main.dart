@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uoguesser/screens/game_guessing_screen.dart';
 import 'package:uoguesser/screens/profile_screen.dart';
+import 'package:uoguesser/screens/leaderboard_screen.dart';
 import 'server/services/service.locator.dart';
 import 'providers/player.provider.dart';
 import 'screens/home_screen.dart';
@@ -53,6 +54,11 @@ final GoRouter _router = GoRouter(
         GoRoute(path: 'profile',
         builder: (BuildContext context, GoRouterState state) {
             return const ProfilePage();
+          },
+        ),
+        GoRoute(path: 'leaderboard_screen',
+        builder: (BuildContext context, GoRouterState state) {
+            return const LeaderboardScreen();
           },
         ),
       ],

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' show cos, sqrt, asin;
+import 'package:uoguesser/server/services/game_instance.service.dart';
+import 'package:get_it/get_it.dart';
 
 class TestMapScreen extends StatefulWidget {
   final double targetLat;
   final double targetLng;
-  final Function(double) onScoreUpdate;
+  final Function(int) onScoreUpdate;
   final VoidCallback onNextPicture;
   final bool isLastImage; // New parameter to track if it's the last image
+  final String instanceId;
+  final String pictureId;
 
   const TestMapScreen({
     super.key,
@@ -16,6 +20,8 @@ class TestMapScreen extends StatefulWidget {
     required this.onScoreUpdate,
     required this.onNextPicture,
     required this.isLastImage,
+    required this.instanceId,
+    required this.pictureId,
   });
 
   @override
@@ -25,10 +31,11 @@ class TestMapScreen extends StatefulWidget {
 class _TestMapScreenState extends State<TestMapScreen> {
   late GoogleMapController mapController;
   LatLng _userGuess = const LatLng(43.53289277070203, -80.22622330298434);
-  double? _score;
+  int? _score;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   bool _isScoreCalculated = false;
+  final _gameInstanceService = GetIt.instance<GameInstanceService>();
 
   LatLng get _target => LatLng(widget.targetLat, widget.targetLng);
 
@@ -70,7 +77,8 @@ class _TestMapScreenState extends State<TestMapScreen> {
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     var p = 0.017453292519943295;
     var c = cos;
-    var a = 0.5 -
+    var a =
+        0.5 -
         c((lat2 - lat1) * p) / 2 +
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
     return 12742 * asin(sqrt(a));
@@ -88,23 +96,42 @@ class _TestMapScreenState extends State<TestMapScreen> {
     final distanceMeters = distanceKm * 1000; // Convert to meters
 
     setState(() {
-      if (distanceMeters <= 10) {
-        _score = 5000;
-      } else if (distanceMeters >= 250) {
-        _score = 0;
+      const maxScore = 5000;
+      const minScore = 0;
+      const maxDistance = 20000.0; // 20km
+
+      if (distanceMeters >= maxDistance) {
+        _score = minScore;
       } else {
-        _score = 5000 * (1 - ((distanceMeters - 10) / 240));
+        _score = (maxScore * (1 - distanceMeters / maxDistance)).round();
       }
       _isScoreCalculated = true;
     });
 
     widget.onScoreUpdate(_score!);
+    if (widget.instanceId.isNotEmpty) {
+      _submitGuess(_userGuess.latitude, _userGuess.longitude, distanceMeters);
+    }
+  }
+
+  Future<void> _submitGuess(double latitude, double longitude, double distanceMeters) async {
+    await _gameInstanceService.submitGuess(
+      widget.instanceId,
+      widget.pictureId,
+      latitude,
+      longitude,
+      distanceMeters
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_score == null ? 'Score: 0' : 'Score: ${_score!.toStringAsFixed(2)}')),
+      appBar: AppBar(
+        title: Text(
+          _score == null ? 'Score: 0' : 'Score: ${_score!.toStringAsFixed(2)}',
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -117,11 +144,12 @@ class _TestMapScreenState extends State<TestMapScreen> {
             ),
           ),
           ElevatedButton(
-            onPressed: _isScoreCalculated ? widget.onNextPicture : getDistanceScore,
+            onPressed:
+                _isScoreCalculated ? widget.onNextPicture : getDistanceScore,
             child: Text(
-              _isScoreCalculated 
-                ? (widget.isLastImage ? "Finish Game" : "Show Next Picture") 
-                : "Submit Guess",
+              _isScoreCalculated
+                  ? (widget.isLastImage ? "Finish Game" : "Show Next Picture")
+                  : "Submit Guess",
             ),
           ),
         ],

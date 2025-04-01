@@ -23,20 +23,19 @@ class Guess {
 
   factory Guess.fromJson(Map<String, dynamic> json) {
     // Extract latitude and longitude from PostGIS point
-    final String locationStr = json['guessed_location'];
-    final RegExp coordRegex = RegExp(r'POINT\(([-\d.]+) ([-\d.]+)\)');
-    final Match? match = coordRegex.firstMatch(locationStr);
+    // final String locationStr = json['guessed_location'];
+    // final RegExp coordRegex = RegExp(r'POINT\(([-\d.]+) ([-\d.]+)\)');
+    // final Match? match = coordRegex.firstMatch(locationStr);
 
-    if (match == null) {
-      throw FormatException('Invalid location format: $locationStr');
-    }
-
+    // if (match == null) {
+    //   throw FormatException('Invalid location format: $locationStr');
+    // }
     return Guess(
       id: json['guess_id'],
       instanceId: json['instance_id'],
       pictureId: json['picture_id'],
-      guessedLatitude: double.parse(match.group(2)!),
-      guessedLongitude: double.parse(match.group(1)!),
+      guessedLatitude: json['guessed_location']['latitude'],
+      guessedLongitude: json['guessed_location']['longitude'],
       distanceMeters: json['distance_meters'],
       score: json['score'],
       responseTime: json['response_time'],

@@ -34,13 +34,14 @@ class GameInstanceService {
     String pictureId,
     double latitude,
     double longitude,
+    double distanceMeters
   ) async {
     try {
       final picture = await _pictureService.getPicture(pictureId);
-      final distanceMeters =
-          (latitude - picture.latitude) +
-          (longitude -
-              picture.longitude); // TODO: Use LatLong2 for distance calculation
+      // final distanceMeters =
+      //     (latitude - picture.latitude) +
+      //     (longitude -
+      //         picture.longitude); // TODO: Use LatLong2 for distance calculation
 
       final guess = Guess(
         id: const Uuid().v4(),
@@ -60,9 +61,9 @@ class GameInstanceService {
     }
   }
 
-  Future<void> completeGame(String instanceId) async {
+  Future<void> completeGame(String instanceId, String playerId) async {
     try {
-      final instance = await _repository.getPlayerGameHistory(instanceId);
+      final instance = await _repository.getPlayerGameHistory(playerId);
       if (instance.isEmpty) {
         throw GameInstanceServiceException('Game instance not found');
       }

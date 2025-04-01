@@ -27,7 +27,6 @@ class GameInstanceRepository {
               'game_id': gameId,
               'player_id': playerId,
               'start_time': DateTime.now().toUtc().toIso8601String(),
-              'mode': mode.name,
             })
             .select()
             .single();
@@ -59,13 +58,16 @@ class GameInstanceRepository {
   }
 
   Future<List<GameInstance>> getPlayerGameHistory(String playerId) async {
-    final response = await _supabase
-        .from(_gameInstancesTable)
-        .select('*, guesses(*)')
-        .eq('player_id', playerId)
-        .order('start_time', ascending: false);
+    final response =
+        await _supabase.rpc('get_player_game_history', params: {'playerid': playerId})
+            as List<dynamic>;
+    final instances =
+        response
+            .where((row) => row != null)
+            .map((row) => GameInstance.fromJson(row as Map<String, dynamic>))
+            .toList();
 
-    return response.map((row) => GameInstance.fromJson(row)).toList();
+    return instances;
   }
 
   Future<List<GameInstance>> getDailyLeaderboard(String gameId) async {

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:uoguesser/server/models/game_instance.dart';
+import 'package:uoguesser/server/services/game_instance.service.dart';
 import 'guessing_screen.dart';
 import 'test_map_screen.dart';
 import 'congratulations_screen.dart';
@@ -6,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import '../server/models/game.dart';
 import '../server/models/picture.dart';
 import '../server/services/game.service.dart';
+import '../providers/player.provider.dart';
 
 class GameGuessingScreen extends StatefulWidget {
   const GameGuessingScreen({super.key});
@@ -20,8 +24,10 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
   double _totalScore = 0;
   int _currentIndex = 0;
   Game? _game;
+  GameInstance? _gameInstance;
   List<Picture> _pictures = [];
   final _gameService = GetIt.instance<GameService>();
+  final _gameInstanceService = GetIt.instance<GameInstanceService>();
 
   String error = "";
 
@@ -29,6 +35,14 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
   void initState() {
     super.initState();
     _getDailyGame();
+  }
+
+  Future<PlayerProvider> getPlayer() async {
+    final playerProvider = context.read<PlayerProvider>();
+    if (playerProvider.currentPlayer == null) {
+      await playerProvider.initialize();
+    }
+    return playerProvider;
   }
 
   Future<void> _getDailyGame() async {
@@ -44,10 +58,68 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
         _pictures = result.pictures;
         _isLoading = false;
       });
+
+      if (_game != null) {
+        await _startGameInstance();
+      } else {
+        setState(() {
+          error = "Game data is missing.";
+        });
+      }
     } catch (e) {
       setState(() {
         error = "Could not get daily game: $e";
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _startGameInstance() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        error = "";
+      });
+      PlayerProvider? playerProvider;
+      try {
+        playerProvider = await getPlayer();
+      } catch (e) {
+        setState(() {
+          error = "Could not get player: $e";
+        });
+        return;
+      }
+
+      final result = await _gameInstanceService.startGame(_game!.id, playerProvider.currentPlayer!.id, GameMode.daily);
+      setState(() {
+        _gameInstance = result;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = "Could not start game: $e";
+        _isLoading = false;
+      });
+    }
+  }
+
+  
+  Future<void> _endGameInstance() async {
+    try{
+      PlayerProvider? playerProvider;
+      try {
+        playerProvider = await getPlayer();
+      } catch (e) {
+        setState(() {
+          error = "Could not get player: $e";
+        });
+        return;
+      }
+
+      await _gameInstanceService.completeGame(_gameInstance!.id, playerProvider.currentPlayer!.id);
+    } catch (e){
+      setState(() {
+        error = "Could not end game: $e";
       });
     }
   }
@@ -97,6 +169,8 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
               onScoreUpdate: _updateScore,
               onNextPicture: _nextPicture,
               isLastImage: _currentIndex == _pictures.length - 1,
+              instanceId: _gameInstance != null ? _gameInstance!.id : "",
+              pictureId: _pictures[_currentIndex].id,
             ),
           ),
         );
@@ -108,7 +182,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
     });
   }
 
-  void _updateScore(double newScore) {
+  void _updateScore(int newScore) {
     setState(() {
       _totalScore += newScore;
     });
@@ -121,6 +195,9 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
       });
       Navigator.pop(context);
     } else {
+      if (_gameInstance != null){
+        _endGameInstance();
+      }
       _finishGame();
     }
   }

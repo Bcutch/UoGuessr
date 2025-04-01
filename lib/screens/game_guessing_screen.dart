@@ -139,7 +139,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Guess the Location"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

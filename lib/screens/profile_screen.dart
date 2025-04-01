@@ -47,9 +47,11 @@ class _ProfilePageState extends State<ProfilePage> {
     final playerProvider = Provider.of<PlayerProvider>(context, listen: false);
     final playerId = widget.playerId ?? playerProvider.currentPlayer?.id;
     final playerService = widget.playerService ?? playerProvider.playerService;
-    final friendshipService = widget.friendshipService ?? playerProvider.friendshipService;
+    final friendshipService =
+        widget.friendshipService ?? playerProvider.friendshipService;
 
-    if (playerId == null || playerService == null || friendshipService == null) return;
+    if (playerId == null || playerService == null || friendshipService == null)
+      return;
 
     playerFuture = playerService.getPlayerProfileById(playerId);
     _friendsFuture = friendshipService.getFriendProfiles(playerId);
@@ -64,9 +66,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _loadData();
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
     } finally {
       setState(() => _isLoggingIn = false);
     }
@@ -80,37 +82,54 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  void _showAddFriendDialog(Player player, PlayerService playerService, FriendshipService friendshipService) {
+  void _showAddFriendDialog(
+    Player player,
+    PlayerService playerService,
+    FriendshipService friendshipService,
+  ) {
     String username = '';
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Friend'),
-        content: TextField(
-          onChanged: (value) => username = value,
-          decoration: const InputDecoration(labelText: 'Friend\'s Username'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              try {
-                final friend = await playerService.getPlayerByUsername(username);
-                await friendshipService.sendFriendRequest(player.id, friend.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Friend request sent!')),
-                );
-                setState(() => _friendsFuture = friendshipService.getFriendProfiles(player.id));
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to add friend: $e')),
-                );
-              }
-            },
-            child: const Text('Send'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add Friend'),
+            content: TextField(
+              onChanged: (value) => username = value,
+              decoration: const InputDecoration(
+                labelText: 'Friend\'s Username',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  try {
+                    final friend = await playerService.getPlayerByUsername(
+                      username,
+                    );
+                    await friendshipService.sendFriendRequest(
+                      player.id,
+                      friend.id,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Friend request sent!')),
+                    );
+                    setState(
+                      () =>
+                          _friendsFuture = friendshipService.getFriendProfiles(
+                            player.id,
+                          ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to add friend: $e')),
+                    );
+                  }
+                },
+                child: const Text('Send'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -118,57 +137,95 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final playerProvider = Provider.of<PlayerProvider>(context);
     final playerService = widget.playerService ?? playerProvider.playerService;
-    final friendshipService = widget.friendshipService ?? playerProvider.friendshipService;
-    print(playerProvider.currentPlayer?.name );
-    if (playerProvider.currentPlayer?.name == null || playerProvider.currentPlayer?.name == "") {
+    final friendshipService =
+        widget.friendshipService ?? playerProvider.friendshipService;
+    print(playerProvider.currentPlayer?.name);
+    if (playerProvider.currentPlayer?.name == null ||
+        playerProvider.currentPlayer?.name == "") {
       return Scaffold(
-        appBar: AppBar(title: const Text('Login')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextField(
-                controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isLoggingIn
-                    ? null
-                    : () => _login(
-                          _usernameController.text.trim(),
-                          _passwordController.text,
-                        ),
-                child: _isLoggingIn
-                    ? const CircularProgressIndicator()
-                    : const Text('Login / Register'),
-              ),
-            ],
+        appBar: AppBar(
+          title: Text('Login'),
+          backgroundColor: Color.fromARGB(255, 194, 4, 48),
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          ),
+        ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/Home-Page-Background.jpg"),
+              fit: BoxFit.cover,
+            ),
+          ),
+          padding: const EdgeInsets.fromLTRB(30, 250, 30, 250),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black, width: 5.0),
+              borderRadius: BorderRadius.circular(10.0),
+              color: Colors.white,
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Username',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Password',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed:
+                      _isLoggingIn
+                          ? null
+                          : () => _login(
+                            _usernameController.text.trim(),
+                            _passwordController.text,
+                          ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 255, 199, 42),
+                    foregroundColor: Colors.black,
+                  ),
+                  child:
+                      _isLoggingIn
+                          ? const CircularProgressIndicator()
+                          : const Text('Login / Register'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Profile'), actions: [
-        IconButton(
+      appBar: AppBar(
+        title: const Text('Your Profile'),
+        actions: [
+          IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: _logout,
-          )
-      ]),
+          ),
+        ],
+      ),
       body: FutureBuilder<Player>(
         future: playerFuture,
         builder: (context, snapshot) {
-            print('Connection state: ${snapshot.connectionState}');
+          print('Connection state: ${snapshot.connectionState}');
           print('Has error: ${snapshot.hasError}');
           print('Has data: ${snapshot.hasData}');
           print('Data: ${snapshot.data}');
@@ -194,9 +251,20 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Friends:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Friends:',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     ElevatedButton(
-                      onPressed: () => _showAddFriendDialog(player, playerService, friendshipService),
+                      onPressed:
+                          () => _showAddFriendDialog(
+                            player,
+                            playerService,
+                            friendshipService,
+                          ),
                       child: const Text('Add Friend'),
                     ),
                   ],
@@ -206,11 +274,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: FutureBuilder<List<Player>>(
                     future: _friendsFuture,
                     builder: (context, friendSnapshot) {
-                      if (friendSnapshot.connectionState == ConnectionState.waiting) {
+                      if (friendSnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (friendSnapshot.hasError) {
-                        return Center(child: Text('Error: ${friendSnapshot.error}'));
-                      } else if (!friendSnapshot.hasData || friendSnapshot.data!.isEmpty) {
+                        return Center(
+                          child: Text('Error: ${friendSnapshot.error}'),
+                        );
+                      } else if (!friendSnapshot.hasData ||
+                          friendSnapshot.data!.isEmpty) {
                         return const Center(child: Text('No friends yet'));
                       }
 
@@ -218,9 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       return ListView.builder(
                         itemCount: friends.length,
                         itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(friends[index].name),
-                          );
+                          return ListTile(title: Text(friends[index].name));
                         },
                       );
                     },

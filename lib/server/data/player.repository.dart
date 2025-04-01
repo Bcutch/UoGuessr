@@ -16,8 +16,9 @@ class PlayerRepository {
 
   Future<Player> getPlayerByUsername(String username) async {
     final response =
-        await _supabase.from(_table).select().eq('username', username).single();
-
+        await _supabase.from(_table).select().eq('name', username).single();
+    print("response!");
+    print(response);
     return Player.fromJson(response);
   }
 

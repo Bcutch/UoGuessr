@@ -16,8 +16,11 @@ class PlayerService {
 
   Future<Player> getPlayerByUsername(String username) async {
     try {
+      print("Getting player by username!");
       return await _repository.getPlayerByUsername(username);
     } catch (e) {
+      print("EXCEPTION");
+      print(e);
       throw PlayerServiceException('Failed to get player by username: $e');
     }
   }

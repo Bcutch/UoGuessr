@@ -108,13 +108,13 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
 
     try {
       // Uncomment when integrating backend
-      // await pictureService.uploadPicture(
-      //   file: pictureFile!,
-      //   playerId: playerProvider.currentPlayer!.id,
-      //   latitude: location!.latitude,
-      //   longitude: location!.longitude,
-      //   title: '${playerProvider.currentPlayer!.name} ${DateTime.now()}',
-      // );
+      await pictureService.uploadPicture(
+        file: pictureFile!,
+        playerId: playerProvider.currentPlayer!.id,
+        latitude: location!.latitude,
+        longitude: location!.longitude,
+        title: '${playerProvider.currentPlayer!.name} ${DateTime.now()}',
+      );
 
       setState(() {
         error = "Photo uploaded successfully!";

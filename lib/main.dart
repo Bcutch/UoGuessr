@@ -16,10 +16,17 @@ Future<void> main() async {
   // Setup service locator
   await setupServices();
 
+  final playerProvider = PlayerProvider();
+  await playerProvider.initialize();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => PlayerProvider()..initialize()),
+        ChangeNotifierProvider(
+          create: (_) {
+            return playerProvider;
+          },
+        ),
       ],
       child: const MyApp(),
     ),
@@ -41,22 +48,26 @@ final GoRouter _router = GoRouter(
             return const GameGuessingScreen();
           },
         ),
-        GoRoute(path: 'upload_picture_screen',
+        GoRoute(
+          path: 'upload_picture_screen',
           builder: (BuildContext context, GoRouterState state) {
             return const TestUploadScreen();
           },
         ),
-        GoRoute(path: 'game_guessing_findit',
+        GoRoute(
+          path: 'game_guessing_findit',
           builder: (BuildContext context, GoRouterState state) {
             return const GameGuessingFindit();
           },
         ),
-        GoRoute(path: 'leaderboard_screen',
+        GoRoute(
+          path: 'leaderboard_screen',
           builder: (BuildContext context, GoRouterState state) {
             return const LeaderboardScreen();
           },
         ),
-        GoRoute(path: 'friends_screen',
+        GoRoute(
+          path: 'friends_screen',
           builder: (BuildContext context, GoRouterState state) {
             return const FriendsScreen();
           },
@@ -71,9 +82,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: _router,
-    );
+    return MaterialApp.router(routerConfig: _router);
   }
 }
 

@@ -27,6 +27,7 @@ class PictureService {
   ///
   /// `playerId`: The id of the player to get pictures for
   Future<List<Picture>> getPicturesByPlayer(String playerId) async {
+    print(playerId);
     try {
       return await _repository.getPicturesByPlayer(playerId);
     } catch (e) {

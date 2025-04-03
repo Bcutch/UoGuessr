@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uoguesser/screens/game_guessing_screen.dart';
+import 'package:uoguesser/screens/profile_screen.dart';
 import 'package:uoguesser/screens/leaderboard_screen.dart';
 import 'server/services/service.locator.dart';
 import 'providers/player.provider.dart';
@@ -18,7 +19,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => PlayerProvider()..initialize()),
+        ChangeNotifierProvider(create: (_) => PlayerProvider()..initialize(), lazy: false),
       ],
       child: const MyApp(),
     ),
@@ -48,6 +49,11 @@ final GoRouter _router = GoRouter(
         GoRoute(path: 'game_guessing_findit',
         builder: (BuildContext context, GoRouterState state) {
             return const GameGuessingFindit();
+          },
+        ),
+        GoRoute(path: 'profile',
+        builder: (BuildContext context, GoRouterState state) {
+            return const ProfilePage();
           },
         ),
         GoRoute(path: 'leaderboard_screen',

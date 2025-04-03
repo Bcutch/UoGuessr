@@ -16,8 +16,9 @@ class PlayerRepository {
 
   Future<Player> getPlayerByUsername(String username) async {
     final response =
-        await _supabase.from(_table).select().eq('username', username).single();
-
+        await _supabase.from(_table).select().eq('name', username).single();
+    print("response!");
+    print(response);
     return Player.fromJson(response);
   }
 
@@ -36,6 +37,13 @@ class PlayerRepository {
     await _supabase
         .from(_table)
         .update({'last_login': DateTime.now().toIso8601String()})
+        .eq('player_id', playerId);
+  }
+  
+  Future<void> updateHighScore(String playerId, double highScore) async {
+    await _supabase
+        .from(_table)
+        .update({'high_score': highScore})
         .eq('player_id', playerId);
   }
 }

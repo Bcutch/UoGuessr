@@ -16,8 +16,11 @@ class PlayerService {
 
   Future<Player> getPlayerByUsername(String username) async {
     try {
+      print("Getting player by username!");
       return await _repository.getPlayerByUsername(username);
     } catch (e) {
+      print("EXCEPTION");
+      print(e);
       throw PlayerServiceException('Failed to get player by username: $e');
     }
   }
@@ -43,6 +46,14 @@ class PlayerService {
       await _repository.updateLastLogin(playerId);
     } catch (e) {
       throw PlayerServiceException('Failed to update last login: $e');
+    }
+  }
+
+  Future<void> updateHighScore(String playerId, double highScore) async {
+    try {
+      await _repository.updateHighScore(playerId, highScore);
+    } catch (e) {
+      throw PlayerServiceException('Failed to update high score: $e');
     }
   }
 }

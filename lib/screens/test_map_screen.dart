@@ -137,7 +137,7 @@ class _TestMapScreenState extends State<TestMapScreen> {
           Expanded(
             child: GoogleMap(
               onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(target: _target, zoom: 17),
+              initialCameraPosition: CameraPosition(target: LatLng(43.5329, -80.2263), zoom: 17),
               markers: _markers,
               polylines: _polylines,
               onTap: _onMapTapped,

@@ -71,6 +71,22 @@ class _TestMapScreenState extends State<TestMapScreen> {
           geodesic: true,
         ),
       );
+
+      _markers.clear();
+      _markers.addAll([
+        Marker(
+          markerId: const MarkerId("Guess"),
+          position: _userGuess,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          draggable: true,
+          onDragEnd: (pos) => _userGuess = pos,
+        ),
+        Marker(
+          markerId: const MarkerId("Target"),
+          position: _target,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        ),
+      ]);
     });
   }
 
@@ -93,12 +109,12 @@ class _TestMapScreenState extends State<TestMapScreen> {
       _target.longitude,
     );
 
-    final distanceMeters = distanceKm * 1000; // Convert to meters
+    final distanceMeters = distanceKm * 1000;
 
     setState(() {
       const maxScore = 5000;
       const minScore = 0;
-      const maxDistance = 20000.0; // 20km
+      const maxDistance = 400.0;
 
       if (distanceMeters >= maxDistance) {
         _score = minScore;

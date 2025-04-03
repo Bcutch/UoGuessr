@@ -48,6 +48,14 @@ class PlayerService {
       throw PlayerServiceException('Failed to update last login: $e');
     }
   }
+
+  Future<void> updateHighScore(String playerId, double highScore) async {
+    try {
+      await _repository.updateHighScore(playerId, highScore);
+    } catch (e) {
+      throw PlayerServiceException('Failed to update high score: $e');
+    }
+  }
 }
 
 class PlayerServiceException implements Exception {

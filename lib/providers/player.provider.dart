@@ -148,4 +148,26 @@ class PlayerProvider extends ChangeNotifier {
       await _createNewPlayer(username, password);
     }
   }
+
+  Future<void> updateHighScore(double newScore) async {
+    if (_currentPlayer == null) return;
+
+    try {
+      await _playerService.updateHighScore(_currentPlayer!.id, newScore);
+      _currentPlayer = Player(
+        id: _currentPlayer!.id,
+        name: _currentPlayer!.name,
+        password: _currentPlayer!.password,
+        biography: _currentPlayer!.biography,
+        createdAt: _currentPlayer!.createdAt,
+        lastLogin: _currentPlayer!.lastLogin,
+        highScore: newScore,
+      );
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Failed to update high score: $e");
+    }
+  }
+
+
 }

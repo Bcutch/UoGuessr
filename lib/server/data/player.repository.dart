@@ -39,4 +39,11 @@ class PlayerRepository {
         .update({'last_login': DateTime.now().toIso8601String()})
         .eq('player_id', playerId);
   }
+  
+  Future<void> updateHighScore(String playerId, double highScore) async {
+    await _supabase
+        .from(_table)
+        .update({'high_score': highScore})
+        .eq('player_id', playerId);
+  }
 }

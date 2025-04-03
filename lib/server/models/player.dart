@@ -5,7 +5,7 @@ class Player {
   final String? biography;
   final DateTime createdAt;
   final DateTime? lastLogin;
-  final int? highScore;
+  final double? highScore;
 
   Player({
     required this.id,
@@ -25,7 +25,7 @@ class Player {
       biography: json['biography'],
       createdAt: DateTime.parse(json['created_at']),
       lastLogin: json['last_login'] != null ? DateTime.parse(json['last_login']) : null,
-      highScore: json['high_score'],
+      highScore: json['high_score'] != null ? (json['high_score'] as num).toDouble() : null,
     );
   }
 

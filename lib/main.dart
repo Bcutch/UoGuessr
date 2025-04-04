@@ -61,6 +61,11 @@ final GoRouter _router = GoRouter(
             return const GameGuessingFindit();
           },
         ),
+        GoRoute(path: 'profile',
+        builder: (BuildContext context, GoRouterState state) {
+            return const ProfilePage();
+          },
+        ),
         GoRoute(path: 'leaderboard_screen',
           builder: (BuildContext context, GoRouterState state) {
             return const LeaderboardScreen();

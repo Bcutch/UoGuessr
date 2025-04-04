@@ -47,6 +47,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
       id: "-1",
       name: "No Friends found",
       createdAt: DateTime.now(),
+      password: "1234"
     );
 
     try {
@@ -55,14 +56,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
       setState(() {
         error = "Error: $e";
       });
-      none = Player(id: "-1", name: "Profile Error", createdAt: DateTime.now());
+      none = Player(id: "-1", name: error, createdAt: DateTime.now(), password: "1234");
 
       friendsList = [none];
       return;
     }
 
     if (playerProvider!.currentPlayer == null) {
-      none = Player(id: "-1", name: "Profile Error", createdAt: DateTime.now());
+      none = Player(id: "-1", name: "Waiting for profile info", createdAt: DateTime.now(), password: "1234");
 
       friendsList = [none];
       return;
@@ -77,9 +78,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
     } catch (e) {
       setState(() {
         error = "Error: $e";
+        friendsList = [none];
       });
 
-      friendsList = [none];
       return;
     }
 
@@ -93,13 +94,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
       id: "-1",
       name: "No Friend Requests found",
       createdAt: DateTime.now(),
+      password: "1234"
     );
 
     if (playerProvider == null) {
       Player none = Player(
         id: "-1",
-        name: "Profile Error",
+        name: "Waiting for profile to load",
         createdAt: DateTime.now(),
+        password: "1234"
       );
       requestsList = [none];
 
@@ -112,8 +115,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
     if (playerProvider!.currentPlayer == null) {
       Player none = Player(
         id: "-1",
-        name: "Profile Error",
+        name: "Waiting for profile info",
         createdAt: DateTime.now(),
+        password: "1234"
       );
       requestsList = [none];
 
@@ -164,6 +168,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               id: "-2",
               name: "UnknownPlayer",
               createdAt: DateTime.now(),
+              password: "1234"
             );
           }
           requestsList.add(checkPlayer);
@@ -219,11 +224,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
               ? FrendsPage(
                 refresh: refresh,
                 requestPage: goToRequestScreen,
-                friendsList: friendsList!,
+                friendsList: friendsList,
               )
               : RequestsScreen(
                 goBack: goToFriendScreen,
-                requests: requestsList!,
+                requests: requestsList,
                 refresh: refreshRequests,
               ),
     );

@@ -21,8 +21,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
   String error = "";
   final friendshipService = GetIt.instance<FriendshipService>();
   final playerService = GetIt.instance<PlayerService>();
-  List<Player> ? friendsList;
-  List<Player> ? requestsList;
+  List<Player> friendsList = [];
+  List<Player> requestsList = [];
   bool requestPage = false;
   PlayerProvider? playerProvider;
 
@@ -43,7 +43,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
   }
 
   void getFriends() async {
-    Player none = Player(id: "-1", name: "No Friends found", createdAt: DateTime.now());
+    Player none = Player(
+      id: "-1",
+      name: "No Friends found",
+      createdAt: DateTime.now(),
+    );
 
     try {
       playerProvider = await getPlayer();
@@ -57,17 +61,19 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
 
-    if(playerProvider!.currentPlayer == null) {
+    if (playerProvider!.currentPlayer == null) {
       none = Player(id: "-1", name: "Profile Error", createdAt: DateTime.now());
 
       friendsList = [none];
       return;
     }
 
-    List<Player> ? friends;
-    
+    List<Player> friends = [];
+
     try {
-      friends = await friendshipService.getFriendProfiles(playerProvider!.currentPlayer!.id);
+      friends = await friendshipService.getFriendProfiles(
+        playerProvider!.currentPlayer!.id,
+      );
     } catch (e) {
       setState(() {
         error = "Error: $e";
@@ -77,20 +83,24 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
 
-    if (friends.isEmpty) {
-      friendsList = [none];
-      return;
-    } else {
+    setState(() {
       friendsList = friends;
-      return;
-    }
+    });
   }
 
   void getRequests() async {
-    Player none = Player(id: "-1", name: "No Friend Requests found", createdAt: DateTime.now());
+    Player none = Player(
+      id: "-1",
+      name: "No Friend Requests found",
+      createdAt: DateTime.now(),
+    );
 
-    if(playerProvider == null) {
-      Player none = Player(id: "-1", name: "Profile Error", createdAt: DateTime.now());
+    if (playerProvider == null) {
+      Player none = Player(
+        id: "-1",
+        name: "Profile Error",
+        createdAt: DateTime.now(),
+      );
       requestsList = [none];
 
       // setState(() {
@@ -99,8 +109,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
 
-    if(playerProvider!.currentPlayer == null) {
-      Player none = Player(id: "-1", name: "Profile Error", createdAt: DateTime.now());
+    if (playerProvider!.currentPlayer == null) {
+      Player none = Player(
+        id: "-1",
+        name: "Profile Error",
+        createdAt: DateTime.now(),
+      );
       requestsList = [none];
 
       // setState(() {
@@ -109,10 +123,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
 
-    List<Friendship> ? friendships;
+    List<Friendship>? friendships;
 
     try {
-      friendships = await friendshipService.getFriendships(playerProvider!.currentPlayer!.id);
+      friendships = await friendshipService.getFriendships(
+        playerProvider!.currentPlayer!.id,
+      );
     } catch (e) {
       setState(() {
         error = "Error: $e";
@@ -134,17 +150,23 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
 
     requestsList = [];
-    Player ? checkPlayer;
+    Player? checkPlayer;
 
     for (var friend in friendships) {
       if (friend.isPending) {
         if (friend.toPlayerId == playerProvider!.currentPlayer!.id) {
           try {
-            checkPlayer = await playerService.getPlayerProfileById(friend.fromPlayerId);
-          } catch(e) {
-            checkPlayer = Player(id: "-2", name: "UnknownPlayer", createdAt: DateTime.now());
+            checkPlayer = await playerService.getPlayerProfileById(
+              friend.fromPlayerId,
+            );
+          } catch (e) {
+            checkPlayer = Player(
+              id: "-2",
+              name: "UnknownPlayer",
+              createdAt: DateTime.now(),
+            );
           }
-          requestsList!.add(checkPlayer);
+          requestsList.add(checkPlayer);
         }
       }
     }
@@ -190,17 +212,31 @@ class _FriendsScreenState extends State<FriendsScreen> {
         title: const Text("Friends!"),
         backgroundColor: Colors.deepOrange,
       ),
-      body: 
-      // isLoading ? Text("LOADING")
-      //   : 
-      !requestPage ? FrendsPage(refresh: refresh, requestPage: goToRequestScreen, friendsList: friendsList!) :
-        RequestsScreen(goBack: goToFriendScreen, requests: requestsList!, refresh: refreshRequests)
+      body:
+          // isLoading ? Text("LOADING")
+          //   :
+          !requestPage
+              ? FrendsPage(
+                refresh: refresh,
+                requestPage: goToRequestScreen,
+                friendsList: friendsList!,
+              )
+              : RequestsScreen(
+                goBack: goToFriendScreen,
+                requests: requestsList!,
+                refresh: refreshRequests,
+              ),
     );
   }
 }
 
 class FrendsPage extends StatefulWidget {
-  const FrendsPage({super.key, required this.refresh, required this.requestPage, required this.friendsList});
+  const FrendsPage({
+    super.key,
+    required this.refresh,
+    required this.requestPage,
+    required this.friendsList,
+  });
 
   final VoidCallback refresh;
   final VoidCallback requestPage;
@@ -211,7 +247,6 @@ class FrendsPage extends StatefulWidget {
 }
 
 class _FrendsPageState extends State<FrendsPage> {
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -223,54 +258,47 @@ class _FrendsPageState extends State<FrendsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height * 1/15,
-              child: Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      alignment: Alignment.topLeft,
-                      child: ElevatedButton(
-                        onPressed: () => {widget.refresh()},
-                        style: ElevatedButton.styleFrom(
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap
-                        ),
-                        child: Text("Refresh"),
+              height: MediaQuery.of(context).size.height * 1 / 15,
+              child: Row(
+                children: [
+                  Container(
+                    alignment: Alignment.topLeft,
+                    child: ElevatedButton(
+                      onPressed: () => {widget.refresh()},
+                      style: ElevatedButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
+                      child: Text("Refresh"),
                     ),
-                    Flexible(
-                      child: Container(
-
-                      )
-                    ),
-                    Container(
-                      alignment: Alignment.topRight,
-                      child: ElevatedButton(
-                        onPressed: ()=>{widget.requestPage()},
-                        style: ElevatedButton.styleFrom(
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap
-                        ),
-                        child: Text("Pending Requests"),
+                  ),
+                  Spacer(),
+                  Container(
+                    alignment: Alignment.topRight,
+                    child: ElevatedButton(
+                      onPressed: () => {widget.requestPage()},
+                      style: ElevatedButton.styleFrom(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                    )
-                  ],
-                ),
+                      child: Text("Pending Requests"),
+                    ),
+                  ),
+                ],
               ),
             ),
-            ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: widget.friendsList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  height: 50,
-                  color: Colors.amber,
-                  child: Center(
-                    child: Text(widget.friendsList[index].name),
-                  ),
-                );
-              }
+            Expanded(
+              child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: widget.friendsList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    height: 50,
+                    color: Colors.amber,
+                    child: Center(child: Text(widget.friendsList[index].name)),
+                  );
+                },
+              ),
             ),
-            
           ],
         ),
       ),

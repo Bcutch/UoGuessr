@@ -90,7 +90,11 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
         return;
       }
 
-      final result = await _gameInstanceService.startGame(_game!.id, playerProvider.currentPlayer!.id, GameMode.daily);
+      final result = await _gameInstanceService.startGame(
+        _game!.id,
+        playerProvider.currentPlayer!.id,
+        GameMode.daily,
+      );
       setState(() {
         _gameInstance = result;
         _isLoading = false;
@@ -103,9 +107,8 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
     }
   }
 
-  
   Future<void> _endGameInstance() async {
-    try{
+    try {
       PlayerProvider? playerProvider;
       try {
         playerProvider = await getPlayer();
@@ -116,8 +119,11 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
         return;
       }
 
-      await _gameInstanceService.completeGame(_gameInstance!.id, playerProvider.currentPlayer!.id);
-    } catch (e){
+      await _gameInstanceService.completeGame(
+        _gameInstance!.id,
+        playerProvider.currentPlayer!.id,
+      );
+    } catch (e) {
       setState(() {
         error = "Could not end game: $e";
       });
@@ -195,7 +201,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
       });
       Navigator.pop(context);
     } else {
-      if (_gameInstance != null){
+      if (_gameInstance != null) {
         _endGameInstance();
       }
       _finishGame();
@@ -217,6 +223,11 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
       appBar: AppBar(
         title: const Text("Guess the Location"),
         backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -226,6 +237,7 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -238,8 +250,12 @@ class _GameGuessingScreenState extends State<GameGuessingScreen> {
               ? FloatingActionButton(
                 onPressed: () => _showMapScreen(context),
                 shape: const CircleBorder(),
-                backgroundColor: Colors.deepOrange,
-                child: const Icon(Icons.keyboard_arrow_up, size: 32),
+                backgroundColor: Color.fromARGB(255, 194, 4, 48),
+                child: const Icon(
+                  Icons.keyboard_arrow_up,
+                  size: 32,
+                  color: Colors.white,
+                ),
               )
               : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

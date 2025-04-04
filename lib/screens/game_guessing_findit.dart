@@ -74,10 +74,16 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
     }
   }
 
-  double _calculateDistanceKm(double lat1, double lon1, double lat2, double lon2) {
+  double _calculateDistanceKm(
+    double lat1,
+    double lon1,
+    double lat2,
+    double lon2,
+  ) {
     var p = 0.017453292519943295;
     var c = cos;
-    var a = 0.5 -
+    var a =
+        0.5 -
         c((lat2 - lat1) * p) / 2 +
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
     return 12742 * asin(sqrt(a));
@@ -99,7 +105,9 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
       await _checkPermissions();
 
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+        ),
       );
 
       double distanceKm = _calculateDistanceKm(
@@ -126,12 +134,16 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
           Marker(
             markerId: const MarkerId("UserLocation"),
             position: userLatLng,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueBlue,
+            ),
           ),
           Marker(
             markerId: const MarkerId("TargetLocation"),
             position: targetLatLng,
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueRed,
+            ),
           ),
         };
         _polylines = {
@@ -140,7 +152,7 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
             color: Colors.red,
             width: 5,
             points: [userLatLng, targetLatLng],
-          )
+          ),
         };
       });
 
@@ -148,12 +160,20 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
         CameraUpdate.newLatLngBounds(
           LatLngBounds(
             southwest: LatLng(
-              userLatLng.latitude < targetLatLng.latitude ? userLatLng.latitude : targetLatLng.latitude,
-              userLatLng.longitude < targetLatLng.longitude ? userLatLng.longitude : targetLatLng.longitude,
+              userLatLng.latitude < targetLatLng.latitude
+                  ? userLatLng.latitude
+                  : targetLatLng.latitude,
+              userLatLng.longitude < targetLatLng.longitude
+                  ? userLatLng.longitude
+                  : targetLatLng.longitude,
             ),
             northeast: LatLng(
-              userLatLng.latitude > targetLatLng.latitude ? userLatLng.latitude : targetLatLng.latitude,
-              userLatLng.longitude > targetLatLng.longitude ? userLatLng.longitude : targetLatLng.longitude,
+              userLatLng.latitude > targetLatLng.latitude
+                  ? userLatLng.latitude
+                  : targetLatLng.latitude,
+              userLatLng.longitude > targetLatLng.longitude
+                  ? userLatLng.longitude
+                  : targetLatLng.longitude,
             ),
           ),
           80,
@@ -195,99 +215,130 @@ class _GameGuessingFinditState extends State<GameGuessingFindit> {
 
   @override
   Widget build(BuildContext context) {
-    final targetLatLng = _pictures.isNotEmpty
-        ? LatLng(
-            _pictures[_currentIndex].latitude,
-            _pictures[_currentIndex].longitude,
-          )
-        : const LatLng(0, 0);
+    final targetLatLng =
+        _pictures.isNotEmpty
+            ? LatLng(
+              _pictures[_currentIndex].latitude,
+              _pictures[_currentIndex].longitude,
+            )
+            : const LatLng(0, 0);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Findit Mode"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
               child: Text(
                 "Score: ${_totalScore.toStringAsFixed(2)}",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _pictures.isEmpty
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _pictures.isEmpty
               ? const Center(child: Text('No pictures available.'))
               : Column(
-                  children: [
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Image.network(
+                        _pictures[_currentIndex].storageUrl,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  if (_userLocation != null)
                     Expanded(
                       flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Image.network(
-                          _pictures[_currentIndex].storageUrl,
-                          fit: BoxFit.contain,
+                      child: GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _userLocation!,
+                          zoom: 16,
                         ),
+                        markers: _markers,
+                        polylines: _polylines,
+                        onMapCreated:
+                            (controller) => _mapController = controller,
                       ),
                     ),
-                    if (_userLocation != null)
-                      Expanded(
-                        flex: 2,
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: _userLocation!,
-                            zoom: 16,
-                          ),
-                          markers: _markers,
-                          polylines: _polylines,
-                          onMapCreated: (controller) => _mapController = controller,
-                        ),
-                      ),
-                    if (error.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(error, style: const TextStyle(color: Colors.red)),
-                      ),
-                    if (_lastScore != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          "You earned ${_lastScore!.toStringAsFixed(0)} points!",
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                  if (error.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 32),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _isCheckingLocation ? null : _checkUserLocation,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepOrange,
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                            ),
-                            child: _isCheckingLocation
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text("I'm here! Check my location"),
-                          ),
-                          if (_lastScore != null)
-                            ElevatedButton(
-                              onPressed: _nextPicture,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                              ),
-                              child: const Text("Next"),
-                            ),
-                        ],
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        error,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
-                  ],
-                ),
+                  if (_lastScore != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        "You earned ${_lastScore!.toStringAsFixed(0)} points!",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed:
+                              _isCheckingLocation ? null : _checkUserLocation,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor: Color.fromARGB(255, 255, 199, 42),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30,
+                              vertical: 15,
+                            ),
+                          ),
+                          child:
+                              _isCheckingLocation
+                                  ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                  : const Text("I'm here! Check my location"),
+                        ),
+                        if (_lastScore != null)
+                          ElevatedButton(
+                            onPressed: _nextPicture,
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.black,
+                              backgroundColor: Color.fromARGB(255, 255, 199, 42),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 30,
+                                vertical: 15,
+                              ),
+                            ),
+                            child: const Text("Next"),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }

@@ -17,7 +17,7 @@ class TestUploadScreen extends StatefulWidget {
 
 class _TestUploadScreenState extends State<TestUploadScreen> {
   final pictureService = GetIt.instance<PictureService>();
-  String playerName = "TestName"; 
+  String playerName = "TestName";
   LatLng? location;
   File? pictureFile;
   bool isTaken = false;
@@ -76,7 +76,9 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+        ),
       );
 
       setState(() {
@@ -149,7 +151,12 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Upload a Picture"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -168,21 +175,26 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
                 if (!isTaken) ...[
                   ElevatedButton.icon(
                     onPressed: takePicture,
-                    icon: const Icon(Icons.camera),
+                    icon: const Icon(Icons.camera, color: Colors.black),
                     label: const Text("Take Photo"),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 15,
+                      ),
+                      backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                      foregroundColor: Colors.black,
                     ),
                   ),
                 ] else ...[
                   pictureFile != null
                       ? SizedBox(
-                          height: 400,
-                          width: 300,
-                          child: Image.file(pictureFile!),
-                        )
+                        height: 400,
+                        width: 300,
+                        child: Image.file(pictureFile!),
+                      )
                       : const Text("No picture available"),
-                  
+
                   const SizedBox(height: 10),
 
                   if (isNull)
@@ -196,11 +208,19 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
                   if (!isNull)
                     ElevatedButton(
                       onPressed: uploadPicture,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                        foregroundColor: Colors.black,
+                      ),
                       child: const Text("Upload"),
                     )
                   else
                     ElevatedButton(
                       onPressed: cancel,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                        foregroundColor: Colors.black,
+                      ),
                       child: const Text("Go Back"),
                     ),
 
@@ -208,6 +228,10 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
 
                   ElevatedButton(
                     onPressed: cancel,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                      foregroundColor: Colors.black,
+                    ),
                     child: const Text("Cancel"),
                   ),
                 ],
@@ -217,7 +241,12 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
                 ElevatedButton(
                   onPressed: goToHomeScreen,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                    foregroundColor: Colors.black,
                   ),
                   child: const Text("Back to Home"),
                 ),

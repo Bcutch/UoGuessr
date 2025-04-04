@@ -107,7 +107,6 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
     }
 
     try {
-      // Uncomment when integrating backend
       await pictureService.uploadPicture(
         file: pictureFile!,
         playerId: playerProvider.currentPlayer!.id,
@@ -115,6 +114,7 @@ class _TestUploadScreenState extends State<TestUploadScreen> {
         longitude: location!.longitude,
         title: '${playerProvider.currentPlayer!.name} ${DateTime.now()}',
       );
+      await playerProvider.refreshPictures();
 
       setState(() {
         error = "Photo uploaded successfully!";

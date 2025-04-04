@@ -90,52 +90,57 @@ class _ProfilePageState extends State<ProfilePage> {
               fit: BoxFit.cover,
             ),
           ),
-          padding: const EdgeInsets.fromLTRB(30, 250, 30, 250),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black, width: 5.0),
-              borderRadius: BorderRadius.circular(10.0),
-              color: Colors.white,
-            ),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Username',
-                  ),
+          padding: const EdgeInsets.fromLTRB(30, 30, 30, 30),
+          child: Center(
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 5.0),
+                borderRadius: BorderRadius.circular(10.0),
+                color: Colors.white,
+              ),
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 250),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Username',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Password',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed:
+                          _isLoggingIn
+                              ? null
+                              : () => _login(
+                                _usernameController.text.trim(),
+                                _passwordController.text,
+                              ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                        foregroundColor: Colors.black,
+                      ),
+                      child:
+                          _isLoggingIn
+                              ? const CircularProgressIndicator()
+                              : const Text('Login / Register'),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Password',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed:
-                      _isLoggingIn
-                          ? null
-                          : () => _login(
-                            _usernameController.text.trim(),
-                            _passwordController.text,
-                          ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 255, 199, 42),
-                    foregroundColor: Colors.black,
-                  ),
-                  child:
-                      _isLoggingIn
-                          ? const CircularProgressIndicator()
-                          : const Text('Login / Register'),
-                ),
-              ],
+              ),
             ),
           ),
         ),

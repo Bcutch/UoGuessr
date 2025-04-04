@@ -30,7 +30,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
     return playerProvider;
   }
 
-  void sendFriendRequest() async {
+  void sendFriendRequest() {
     TextEditingController _controller = TextEditingController();
 
     showDialog(
@@ -78,7 +78,32 @@ class _RequestsScreenState extends State<RequestsScreen> {
                     height: 60,
                     padding: const EdgeInsets.all(8.0),
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        PlayerProvider ? me;
+
+                        try {
+                          me = await getPlayer();
+                        } catch (e) {
+                          throw Exception("$e");
+                        }
+
+                        String myId = me.currentPlayer!.id;
+
+                        Player ? them;
+
+                        try {
+                          them = await playerService.getPlayerByUsername(_controller.text);
+                        } catch (e) {
+                          throw Exception("$e");
+                        }
+
+                        String requestId = them.id;
+
+                        try {
+                          await friendshipService.sendFriendRequest(myId, requestId);
+                        } catch (e) {
+                          throw Exception("$e");
+                        }
                         Navigator.of(context).pop();
                       },
                       child: Text(
@@ -93,7 +118,9 @@ class _RequestsScreenState extends State<RequestsScreen> {
         );
       }
     );
+  }
 
+  void acceptFriendRequest(Player request) async {
     PlayerProvider ? me;
 
     try {
@@ -102,23 +129,19 @@ class _RequestsScreenState extends State<RequestsScreen> {
       throw Exception("$e");
     }
 
-    String myId = me.currentPlayer!.id;
+    await friendshipService.acceptFriendRequest(request.id, me.currentPlayer!.id);
+  }
 
-    Player ? them;
+  void rejectFriendRequest(Player request) async {
+    PlayerProvider ? me;
 
     try {
-      them = await playerService.getPlayerByUsername(_controller.text);
+      me = await getPlayer();
     } catch (e) {
       throw Exception("$e");
     }
 
-    String requestId = them.id;
-
-    try {
-      await friendshipService.sendFriendRequest(myId, requestId);
-    } catch (e) {
-      throw Exception("$e");
-    }
+    await friendshipService.rejectFriendRequest(request.id, me.currentPlayer!.id);
   }
 
   @override
@@ -190,9 +213,22 @@ class _RequestsScreenState extends State<RequestsScreen> {
                 return Container(
                   height: 50,
                   color: Colors.amber,
-                  child: Center(
-                    child: Text(widget.requests[index].name),
-                  ),
+                  child: Row(
+                    children: [
+                      Center(
+                        child: Text(widget.requests[index].name),
+                      ),
+                      Flexible(child: Container()),
+                      widget.requests[index].id != "-1" ? ElevatedButton(
+                        onPressed: () {acceptFriendRequest(widget.requests[index]);},
+                        child: Text("Accept")
+                      ) : Text(""),
+                      widget.requests[index].id != "-1" ? ElevatedButton(
+                        onPressed: () {rejectFriendRequest(widget.requests[index]);},
+                        child: Text("Reject")
+                      ) : Text(""),
+                    ],
+                  ) 
                 );
               }
             ),

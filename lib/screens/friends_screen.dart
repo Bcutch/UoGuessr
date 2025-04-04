@@ -165,7 +165,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             );
           } catch (e) {
             checkPlayer = Player(
-              id: "-2",
+              id: "-1",
               name: "UnknownPlayer",
               createdAt: DateTime.now(),
               password: "1234"
@@ -290,19 +290,17 @@ class _FrendsPageState extends State<FrendsPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: widget.friendsList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    height: 50,
-                    color: Colors.amber,
-                    child: Center(child: Text(widget.friendsList[index].name)),
-                  );
-                },
-              ),
+            ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: widget.friendsList.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  height: 50,
+                  color: Colors.amber,
+                  child: Center(child: Text(widget.friendsList[index].name)),
+                );
+              },
             ),
           ],
         ),

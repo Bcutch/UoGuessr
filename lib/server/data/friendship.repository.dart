@@ -23,12 +23,35 @@ class FriendshipRepository {
   /// Get the current players friends (accepted)
   Future<List<Player>> getFriendProfiles(String playerId) async {
     final response = await _supabase
-        .from(_friendshipsTable)
-        .select('players!player_id_2(*)')
-        .eq('player_id_1', playerId)
-        .eq('status', FriendRequestStatus.accepted.toJson());
+    .from(_friendshipsTable)
+    .select('''
+      player_id_1,
+      player_id_2,
+      player1:players!player_id_1(*),
+      player2:players!player_id_2(*)
+    ''')
+    .or('player_id_1.eq.$playerId,player_id_2.eq.$playerId')
+    .eq('status', FriendRequestStatus.accepted.toJson());
 
-    return response.map((row) => Player.fromJson(row['players'])).toList();
+    final friendships = response as List<dynamic>;
+    final friends = friendships.map((friendship) {
+      if (friendship['player_id_1'] == playerId) {
+        return Player.fromJson(friendship['player2']);
+      } else {
+        return Player.fromJson(friendship['player1']); // Return the other player's data
+      }
+    }).toList();
+
+    final uniqueFriends = List<Player>.empty(growable: true);
+    final playerIds = <String>{};
+
+    for (final player in friends) {
+      if (!playerIds.contains(player.id)) {
+        playerIds.add(player.id);
+        uniqueFriends.add(player);
+      }
+    }
+    return uniqueFriends;
   }
 
   /// Send a friend request
@@ -50,6 +73,11 @@ class FriendshipRepository {
         .update({'status': FriendRequestStatus.accepted.toJson()})
         .eq('player_id_1', fromPlayerId)
         .eq('player_id_2', toPlayerId);
+    await _supabase
+        .from(_friendshipsTable)
+        .update({'status': FriendRequestStatus.accepted.toJson()})
+        .eq('player_id_1', toPlayerId)
+        .eq('player_id_2', fromPlayerId);
   }
 
   /// Reject a friend request

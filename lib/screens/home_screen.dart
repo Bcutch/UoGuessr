@@ -61,7 +61,10 @@ class _HomeScreenScreenState extends State<HomeScreen> {
                   onPressed: () => context.go('/profile'),
                   child: Text('Profile'),
                 ),
-                ElevatedButton(onPressed: () {}, child: Text('TODO: Friends')),
+                ElevatedButton(
+                  onPressed: () => context.go('/friends_screen'),
+                  child: Text('Friends')
+                ),
               ],
             ),
           ),

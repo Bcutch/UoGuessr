@@ -9,6 +9,7 @@ import 'screens/home_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'screens/upload_picture_screen.dart';
 import 'screens/game_guessing_findit.dart';
+import 'screens/friends_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,10 +17,17 @@ Future<void> main() async {
   // Setup service locator
   await setupServices();
 
+  final playerProvider = PlayerProvider();
+  await playerProvider.initialize();
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => PlayerProvider()..initialize(), lazy: false),
+        ChangeNotifierProvider(
+          create: (_) {
+            return playerProvider;
+          },
+        ),
       ],
       child: const MyApp(),
     ),
@@ -41,13 +49,15 @@ final GoRouter _router = GoRouter(
             return const GameGuessingScreen();
           },
         ),
-        GoRoute(path: 'upload_picture_screen',
-        builder: (BuildContext context, GoRouterState state) {
+        GoRoute(
+          path: 'upload_picture_screen',
+          builder: (BuildContext context, GoRouterState state) {
             return const TestUploadScreen();
           },
         ),
-        GoRoute(path: 'game_guessing_findit',
-        builder: (BuildContext context, GoRouterState state) {
+        GoRoute(
+          path: 'game_guessing_findit',
+          builder: (BuildContext context, GoRouterState state) {
             return const GameGuessingFindit();
           },
         ),
@@ -57,8 +67,14 @@ final GoRouter _router = GoRouter(
           },
         ),
         GoRoute(path: 'leaderboard_screen',
-        builder: (BuildContext context, GoRouterState state) {
+          builder: (BuildContext context, GoRouterState state) {
             return const LeaderboardScreen();
+          },
+        ),
+        GoRoute(
+          path: 'friends_screen',
+          builder: (BuildContext context, GoRouterState state) {
+            return const FriendsScreen();
           },
         ),
       ],
@@ -71,9 +87,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: _router,
-    );
+    return MaterialApp.router(routerConfig: _router);
   }
 }
 

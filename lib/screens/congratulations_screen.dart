@@ -31,7 +31,12 @@ class CongratulationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Game Over"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
       ),
       body: Center(
         child: Column(
@@ -52,7 +57,8 @@ class CongratulationsScreen extends StatelessWidget {
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange,
+                backgroundColor: const Color.fromARGB(255, 255, 199, 42),
+                foregroundColor: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
               child: const Text("Return to Main Menu", style: TextStyle(fontSize: 18)),

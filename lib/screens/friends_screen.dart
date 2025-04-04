@@ -215,7 +215,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Friends!"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
       ),
       body:
           // isLoading ? Text("LOADING")
@@ -271,6 +276,8 @@ class _FrendsPageState extends State<FrendsPage> {
                     child: ElevatedButton(
                       onPressed: () => {widget.refresh()},
                       style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Color.fromARGB(255, 255, 199, 42),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text("Refresh"),
@@ -282,6 +289,8 @@ class _FrendsPageState extends State<FrendsPage> {
                     child: ElevatedButton(
                       onPressed: () => {widget.requestPage()},
                       style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Color.fromARGB(255, 255, 199, 42),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text("Pending Requests"),
@@ -297,7 +306,7 @@ class _FrendsPageState extends State<FrendsPage> {
               itemBuilder: (BuildContext context, int index) {
                 return Container(
                   height: 50,
-                  color: Colors.amber,
+                  color: Color.fromARGB(255, 255, 199, 42),
                   child: Center(child: Text(widget.friendsList[index].name)),
                 );
               },

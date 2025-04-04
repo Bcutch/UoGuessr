@@ -73,7 +73,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Leaderboard"),
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
       ),
       body:
           _isLoading
@@ -90,11 +95,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           ElevatedButton(
                             onPressed: () { // TODO: change to global leaderboards
                             },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.black,
+                              backgroundColor: Color.fromARGB(255, 255, 199, 42),
+                            ),
                             child: Text('Global'),
                           ),
                           ElevatedButton(
                             onPressed: () { // TODO: change to friends leaderboards
                             },
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.black,
+                              backgroundColor: Color.fromARGB(255, 255, 199, 42),
+                            ),
                             child: Text('Friends'),
                           ),
                         ],
@@ -114,7 +127,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         children: [
                           TableRow(
                             decoration: BoxDecoration(
-                              color: Colors.deepOrangeAccent,
+                              color: Color.fromARGB(255, 194, 4, 48),
                             ),
                             children: [
                               Padding(

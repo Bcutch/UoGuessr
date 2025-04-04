@@ -6,10 +6,7 @@ import 'package:uoguesser/providers/player.provider.dart';
 class ProfilePage extends StatefulWidget {
   final String? playerId;
 
-  const ProfilePage({
-    Key? key,
-    this.playerId,
-  }) : super(key: key);
+  const ProfilePage({Key? key, this.playerId}) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -54,9 +51,9 @@ class _ProfilePageState extends State<ProfilePage> {
         _loadData();
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
     } finally {
       setState(() => _isLoggingIn = false);
     }
@@ -122,19 +119,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: _isLoggingIn
-                      ? null
-                      : () => _login(
-                          _usernameController.text.trim(),
-                          _passwordController.text,
-                        ),
+                  onPressed:
+                      _isLoggingIn
+                          ? null
+                          : () => _login(
+                            _usernameController.text.trim(),
+                            _passwordController.text,
+                          ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 255, 199, 42),
                     foregroundColor: Colors.black,
                   ),
-                  child: _isLoggingIn
-                      ? const CircularProgressIndicator()
-                      : const Text('Login / Register'),
+                  child:
+                      _isLoggingIn
+                          ? const CircularProgressIndicator()
+                          : const Text('Login / Register'),
                 ),
               ],
             ),
@@ -146,9 +145,16 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Profile'),
+        backgroundColor: Color.fromARGB(255, 194, 4, 48),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 25,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            color: Colors.white,
             tooltip: 'Logout',
             onPressed: _logout,
           ),
@@ -167,21 +173,43 @@ class _ProfilePageState extends State<ProfilePage> {
 
           final player = snapshot.data!;
 
-          return Padding(
+          return Container(
             padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(color: Colors.white),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Username: ${player.name}"),
+                Center(
+                  child: Text(
+                    player.name,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Center(
+                  child: Container(
+                    height: 200,
+                    width: 200,
+                    child: Image.asset(
+                      'assets/images/profilePic.png',
+                      fit: BoxFit.scaleDown,
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "High Score: ${player.highScore ?? 'N/A'}",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text("High Score: ${player.highScore ?? 'N/A'}"),
-                const SizedBox(height: 16),
+                Container(
+                  height: 2,
+                  decoration: BoxDecoration(color: Colors.black),
+                ),
+                const SizedBox(height: 8),
                 const Text(
                   'Recent Uploads:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Expanded(
@@ -190,23 +218,27 @@ class _ProfilePageState extends State<ProfilePage> {
                       final pictures = playerProvider.pictures;
 
                       if (pictures.isEmpty) {
-                        return const Center(child: Text('No uploaded pictures yet.'));
+                        return const Center(
+                          child: Text('No uploaded pictures yet.'),
+                        );
                       }
 
                       return GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                            ),
                         itemCount: pictures.length,
                         itemBuilder: (context, index) {
                           final picture = pictures[index];
                           return Image.network(
                             picture.storageUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image),
+                            errorBuilder:
+                                (context, error, stackTrace) =>
+                                    const Icon(Icons.broken_image),
                           );
                         },
                       );
